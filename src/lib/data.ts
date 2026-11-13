@@ -28,7 +28,22 @@ const e = (
     "Placeholder description. Meet local professionals, trade ideas, and build relationships in a relaxed setting. Real event details will be added during curation.",
 });
 
-export const events: Event[] = [
+// Placeholder coordinates [lat, lng] per event
+const coords: Record<string, [number, number]> = {
+  "waikiki-happy-hour": [21.2766, -157.8266],
+  "fin-mixer-1": [21.3068, -157.8654],
+  "tech-meetup-1": [21.2955, -157.8567],
+  "startup-pitch-1": [21.2905, -157.853],
+  "gen-breakfast-1": [21.3092, -157.8601],
+  "fin-planning-1": [21.2793, -157.8294],
+  "gen-happy-1": [21.3, -157.859],
+  "tech-ai-1": [21.3011, -157.8588],
+  "startup-coffee-1": [21.2987, -157.8612],
+  "fin-estate-1": [21.3086, -157.8618],
+};
+
+const baseEvents: Event[] = [
+  e("waikiki-happy-hour", "Sunset Happy Hour on the Deck", "General Professional", "2026-11-18", "17:00", "19:00", "Waikīkī Beachfront Deck", "Placeholder YP Club", true),
   e("fin-mixer-1", "Financial Advisors Mixer", "Finance", "2026-11-19", "17:30", "19:30", "Aloha Tower Marketplace", "Placeholder Advisors Group", true),
   e("tech-meetup-1", "Island Tech Meetup", "Tech", "2026-11-20", "18:00", "20:00", "Kakaʻako Coworking Hub", "Placeholder Tech Collective", true),
   e("startup-pitch-1", "Startup Pitch Night", "Startup", "2026-11-24", "18:30", "21:00", "Ward Village Event Space", "Placeholder Founders Network", true),
@@ -39,6 +54,11 @@ export const events: Event[] = [
   e("startup-coffee-1", "Founders Coffee Chat", "Startup", "2026-12-11", "08:00", "09:30", "Local Coffee Roastery", "Placeholder Founders Network"),
   e("fin-estate-1", "Estate & Wealth Planning Panel", "Finance", "2026-12-16", "17:30", "19:30", "Bishop Street Conference Room", "Placeholder Advisors Group"),
 ];
+
+export const events: Event[] = baseEvents.map((ev) => {
+  const c = coords[ev.id];
+  return c ? { ...ev, lat: c[0], lng: c[1] } : ev;
+});
 
 export const categories = ["Finance", "Tech", "General Professional", "Startup"] as const;
 

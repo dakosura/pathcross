@@ -13,7 +13,7 @@ export function PromptBox() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div className="w-full max-w-2xl">
       <form
         onSubmit={(e) => { e.preventDefault(); go(q); }}
         className="flex flex-col gap-2 rounded-xl bg-card p-2 shadow-xl ring-1 ring-line focus-within:ring-2 focus-within:ring-clay-300 sm:flex-row"
@@ -30,7 +30,7 @@ export function PromptBox() {
           Find events
         </button>
       </form>
-      <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
+      <div className="mt-4 flex flex-wrap justify-start gap-2 text-sm">
         {suggestions.map((s) => (
           <button key={s} onClick={() => go(s)} className="rounded-md border border-cream/25 px-3 py-1 text-cream/85 hover:bg-cream/10">
             {s}

@@ -20,6 +20,9 @@ export interface Event {
   /** Defaults to Honolulu */
   city: string;
   featured: boolean;
+  /** Map position (optional until geocoded) */
+  lat?: number;
+  lng?: number;
 }
 
 export interface TopList {
