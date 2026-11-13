@@ -1,25 +1,39 @@
 @import "tailwindcss";
 
+/* Forest Path palette */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
 
-  --color-navy-50: #f3f6fb;
-  --color-navy-100: #e3eaf5;
-  --color-navy-200: #c6d3e8;
-  --color-navy-500: #4a6590;
-  --color-navy-700: #243a63;
-  --color-navy-800: #1b2d4f;
-  --color-navy-900: #122041;
+  --color-cream: #f7f4ef;
+  --color-card: #fcfaf6;
+  --color-sand: #efe9de;
+  --color-line: #e6dfd3;
 
-  --color-teal-50: #effaf8;
-  --color-teal-100: #d3f3ee;
-  --color-teal-400: #3cc3b3;
-  --color-teal-500: #1fa899;
-  --color-teal-600: #148a7e;
-  --color-teal-700: #136e66;
+  --color-forest: #1e3a2f;
+  --color-forest-700: #2b4a3d;
+  --color-moss: #4a6b4f;
+  --color-moss-50: #edf1e8;
+
+  --color-clay: #c17f4a;
+  --color-clay-300: #d4a574;
+  --color-clay-700: #a05f2e;
+  --color-clay-50: #f6eadd;
+
+  --color-bark: #5c4a3a;
+  --color-ink: #2a2419;
 }
 
-body {
-  background: #ffffff;
-  color: var(--color-navy-900);
+@layer base {
+  body {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    line-height: 1.65;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  ::selection { background: var(--color-clay-300); color: var(--color-ink); }
 }

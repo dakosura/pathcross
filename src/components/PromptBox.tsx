@@ -16,7 +16,7 @@ export function PromptBox() {
     <div className="mx-auto w-full max-w-2xl">
       <form
         onSubmit={(e) => { e.preventDefault(); go(q); }}
-        className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-navy-100 sm:flex-row"
+        className="flex flex-col gap-2 rounded-xl bg-card p-2 shadow-xl ring-1 ring-line focus-within:ring-2 focus-within:ring-clay-300 sm:flex-row"
       >
         <label htmlFor="prompt" className="sr-only">What kind of networking are you looking for?</label>
         <input
@@ -24,15 +24,15 @@ export function PromptBox() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="What kind of networking are you looking for?"
-          className="min-w-0 flex-1 rounded-xl px-4 py-3 text-base text-navy-900 outline-none placeholder:text-navy-500/70"
+          className="min-w-0 flex-1 rounded-xl px-4 py-3 text-sm sm:text-base text-ink outline-none placeholder:text-bark/60"
         />
-        <button type="submit" className="rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white hover:bg-teal-700">
+        <button type="submit" className="rounded-lg bg-clay px-6 py-3 font-semibold text-white hover:bg-clay-700">
           Find events
         </button>
       </form>
       <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
         {suggestions.map((s) => (
-          <button key={s} onClick={() => go(s)} className="rounded-full border border-white/30 px-3 py-1 text-white/90 hover:bg-white/10">
+          <button key={s} onClick={() => go(s)} className="rounded-md border border-cream/25 px-3 py-1 text-cream/85 hover:bg-cream/10">
             {s}
           </button>
         ))}

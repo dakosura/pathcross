@@ -11,22 +11,22 @@ const links = [
 export function Header() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-30 border-b border-navy-100 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-card/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight text-navy-900">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-navy-800 text-sm text-white">P</span>
-          <span>Path<span className="text-teal-600">Cross</span></span>
+        <Link href="/" className="flex items-center gap-2 text-lg font-display text-xl font-semibold tracking-tight text-ink">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-forest text-sm text-cream">P</span>
+          <span>Path<span className="text-clay-700">Cross</span></span>
         </Link>
-        <nav className="hidden items-center gap-8 text-sm font-medium text-navy-700 md:flex">
+        <nav className="hidden items-center gap-8 text-sm font-medium text-bark md:flex">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="hover:text-teal-600">{l.label}</Link>
+            <Link key={l.href} href={l.href} className="hover:text-clay-700">{l.label}</Link>
           ))}
-          <Link href="/events" className="rounded-full bg-teal-600 px-4 py-2 text-white hover:bg-teal-700">
+          <Link href="/events" className="rounded-md bg-forest px-4 py-2 text-white hover:bg-forest-700">
             Find events
           </Link>
         </nav>
         <button
-          className="rounded-md p-2 text-navy-800 md:hidden"
+          className="rounded-md p-2 text-forest md:hidden"
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen(!open)}
@@ -37,9 +37,9 @@ export function Header() {
         </button>
       </div>
       {open && (
-        <nav className="border-t border-navy-100 bg-white px-4 py-3 md:hidden">
+        <nav className="border-t border-line bg-card px-4 py-3 md:hidden">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="block py-2 font-medium text-navy-800">
+            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="block py-2 font-medium text-forest">
               {l.label}
             </Link>
           ))}

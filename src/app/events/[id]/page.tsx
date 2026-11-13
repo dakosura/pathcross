@@ -21,22 +21,22 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <Link href="/events" className="text-sm font-medium text-teal-600 hover:text-teal-700">← All events</Link>
+      <Link href="/events" className="text-sm font-medium text-clay-700 hover:text-clay">← All events</Link>
       <div className="mt-6"><CategoryBadge category={ev.category} /></div>
       <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{ev.title}</h1>
-      <p className="mt-2 text-navy-500">Organized by {ev.organizer}</p>
+      <p className="mt-2 text-bark">Organized by {ev.organizer}</p>
 
       <div className="mt-10 grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2">
           <h2 className="text-lg font-semibold">About this event</h2>
-          <p className="mt-3 leading-relaxed text-navy-700">{ev.description}</p>
+          <p className="mt-3 leading-relaxed text-bark">{ev.description}</p>
         </div>
-        <aside className="h-fit rounded-2xl border border-navy-100 bg-navy-50 p-6 text-sm">
+        <aside className="h-fit rounded-xl border border-line bg-sand p-6 text-sm">
           <dl className="space-y-4">
-            <div><dt className="font-semibold text-navy-900">When</dt><dd className="text-navy-700">{formatDate(ev.date, { weekday: "long", year: "numeric" })}<br />{formatRange(ev.start_time, ev.end_time)}</dd></div>
-            <div><dt className="font-semibold text-navy-900">Where</dt><dd className="text-navy-700">{ev.location.venue}<br />{ev.location.city}</dd></div>
+            <div><dt className="font-semibold text-ink">When</dt><dd className="text-bark">{formatDate(ev.date, { weekday: "long", year: "numeric" })}<br />{formatRange(ev.start_time, ev.end_time)}</dd></div>
+            <div><dt className="font-semibold text-ink">Where</dt><dd className="text-bark">{ev.location.venue}<br />{ev.location.city}</dd></div>
           </dl>
-          <a href={ev.source_url} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-full bg-teal-600 py-3 text-center font-semibold text-white hover:bg-teal-700">
+          <a href={ev.source_url} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-md bg-forest py-3 text-center font-semibold text-white hover:bg-forest-700">
             View original listing
           </a>
         </aside>

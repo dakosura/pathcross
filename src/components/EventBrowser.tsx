@@ -22,8 +22,8 @@ export function EventBrowser({ events, categories, initialQuery = "" }: { events
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                category === c ? "bg-navy-800 text-white" : "bg-navy-50 text-navy-700 hover:bg-navy-100"
+              className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+                category === c ? "bg-forest text-white" : "bg-sand text-bark hover:bg-line"
               }`}
             >
               {c}
@@ -35,7 +35,7 @@ export function EventBrowser({ events, categories, initialQuery = "" }: { events
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search events…"
           aria-label="Search events"
-          className="w-full rounded-full border border-navy-200 px-4 py-2 text-sm outline-none focus:border-teal-500 md:w-64"
+          className="w-full rounded-md border border-line px-4 py-2 text-sm outline-none focus:border-moss md:w-64"
         />
       </div>
       <EventGrid events={filtered} />
