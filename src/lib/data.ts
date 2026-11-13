@@ -30,7 +30,7 @@ const e = (
 
 // Placeholder coordinates [lat, lng] per event
 const coords: Record<string, [number, number]> = {
-  "waikiki-happy-hour": [21.2766, -157.8266],
+  "waikiki-happy-hour": [21.2720, -157.8211],
   "fin-mixer-1": [21.3068, -157.8654],
   "tech-meetup-1": [21.2955, -157.8567],
   "startup-pitch-1": [21.2905, -157.853],
@@ -43,7 +43,7 @@ const coords: Record<string, [number, number]> = {
 };
 
 const baseEvents: Event[] = [
-  e("waikiki-happy-hour", "Sunset Happy Hour on the Deck", "General Professional", "2026-11-18", "17:00", "19:00", "Waikīkī Beachfront Deck", "Placeholder YP Club", true),
+  e("waikiki-happy-hour", "Sunset Happy Hour on the Deck", "General Professional", "2026-11-18", "17:00", "19:00", "DECK. at Queen Kapiʻolani Hotel", "Placeholder YP Club", true),
   e("fin-mixer-1", "Financial Advisors Mixer", "Finance", "2026-11-19", "17:30", "19:30", "Aloha Tower Marketplace", "Placeholder Advisors Group", true),
   e("tech-meetup-1", "Island Tech Meetup", "Tech", "2026-11-20", "18:00", "20:00", "Kakaʻako Coworking Hub", "Placeholder Tech Collective", true),
   e("startup-pitch-1", "Startup Pitch Night", "Startup", "2026-11-24", "18:30", "21:00", "Ward Village Event Space", "Placeholder Founders Network", true),
