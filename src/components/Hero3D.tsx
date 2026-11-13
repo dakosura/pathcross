@@ -11,7 +11,11 @@ function loadGoogle(key: string): Promise<void> {
     const s = document.createElement("script");
     s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=beta&loading=async`;
     s.async = true;
-    s.onload = () => resolve();
+    s.onload = async () => {
+      // importLibrary can appear a tick after the script's load event
+      for (let i = 0; i < 50 && !w.google?.maps?.importLibrary; i++) await new Promise((r) => setTimeout(r, 100));
+      w.google?.maps?.importLibrary ? resolve() : reject(new Error("importLibrary unavailable"));
+    };
     s.onerror = () => reject(new Error("Google Maps failed to load"));
     document.head.appendChild(s);
   });
@@ -64,7 +68,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
 
   useEffect(() => {
     let cancelled = false;
-    (window as any).gm_authFailure = () => onFail();
+    (window as any).gm_authFailure = () => { console.error("Hero3D: Google auth failure"); onFail(); };
     (async () => {
       try {
         await loadGoogle(apiKey);
@@ -88,7 +92,8 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
         }
         setReady(true);
         play();
-      } catch {
+      } catch (err) {
+        console.error("Hero3D failed:", err);
         if (!cancelled) onFail();
       }
     })();

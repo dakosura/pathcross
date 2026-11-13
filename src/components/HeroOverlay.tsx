@@ -23,7 +23,7 @@ export function HeroOverlay({
           <div className="mt-5 sm:mt-6"><PromptBox /></div>
         </div>
 
-        <div className="flex items-end justify-between gap-4 pb-5">
+        <div className="flex items-end justify-between gap-4 pb-5 pl-28">
           <button
             onClick={onReplay}
             disabled={!ready}
