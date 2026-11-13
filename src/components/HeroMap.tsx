@@ -1,11 +1,9 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as MLMap, Marker } from "maplibre-gl";
 import type { Event } from "@/types";
-import { formatDate, formatRange } from "@/lib/format";
-import { PromptBox } from "./PromptBox";
+import { HeroOverlay } from "./HeroOverlay";
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
@@ -113,46 +111,8 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
   }, []);
 
   return (
-    <section className="relative h-[720px] overflow-hidden bg-sand sm:h-[680px]">
-      <div className="absolute inset-0"><div ref={el} className="h-full w-full" /></div>
-      <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl flex-col justify-between gap-4 px-4 py-6 sm:px-6 sm:py-10">
-        <div className="pointer-events-auto max-w-xl rounded-xl bg-forest/95 p-5 text-cream shadow-xl backdrop-blur sm:p-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-clay-300">Honolulu · Professional networking</p>
-          <h1 className="text-3xl font-semibold sm:text-5xl">
-            Every good connection starts with <span className="italic text-clay-300">crossing paths.</span>
-          </h1>
-          <p className="mt-4 hidden text-cream/75 sm:block">
-            A curated guide to the events, groups, and communities worth showing up for.
-          </p>
-          <div className="mt-5 sm:mt-6"><PromptBox /></div>
-        </div>
-
-        <div className="flex items-end justify-between gap-4 pb-5">
-          <button
-            onClick={play}
-            disabled={!ready}
-            className="pointer-events-auto rounded-lg bg-card/95 px-3 py-2 text-sm font-medium text-forest shadow-md hover:bg-card disabled:opacity-50"
-          >
-            ↻ Replay
-          </button>
-          <div
-            className={`pointer-events-auto w-full max-w-sm rounded-xl bg-card p-5 shadow-xl ring-1 ring-line transition duration-700 ${
-              arrived ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
-            }`}
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-clay-700">Happening in Honolulu</p>
-            <h2 className="mt-1 text-xl font-semibold text-ink">{target.title}</h2>
-            <p className="mt-1 text-sm text-bark">
-              {formatDate(target.date)} · {formatRange(target.start_time, target.end_time)}
-              <br />
-              {target.location.venue}
-            </p>
-            <Link href={`/events/${target.id}`} className="mt-4 inline-block rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-cream hover:bg-forest-700">
-              View event →
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HeroOverlay target={target} arrived={arrived} ready={ready} onReplay={play}>
+      <div ref={el} className="h-full w-full" />
+    </HeroOverlay>
   );
 }

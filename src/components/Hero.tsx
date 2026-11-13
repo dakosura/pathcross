@@ -1,7 +1,7 @@
 import { getEvents } from "@/lib/data";
-import { HeroMap } from "./HeroMap";
+import { HeroClient } from "./HeroClient";
 
 export async function Hero() {
   const events = await getEvents();
-  return <HeroMap events={events} tourId="waikiki-happy-hour" />;
+  return <HeroClient events={events} tourId="waikiki-happy-hour" />;
 }
