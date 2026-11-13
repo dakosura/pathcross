@@ -53,10 +53,10 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
     // One continuous flight: no stops between Oahu, Honolulu and the venue.
     timer.current = window.setTimeout(() => {
       map.addEventListener("gmp-animationend", () => setArrived(true), { once: true });
-      map.flyCameraTo({ endCamera: end, durationMillis: 10000 });
+      map.flyCameraTo({ endCamera: end, durationMillis: 13000 });
     }, 700);
     // safety net if the animation event never fires
-    safety.current = window.setTimeout(() => setArrived(true), 16000);
+    safety.current = window.setTimeout(() => setArrived(true), 19000);
   }, [target]);
 
   useEffect(() => {
