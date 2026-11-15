@@ -20,6 +20,16 @@ export interface Event {
   /** Defaults to Honolulu */
   city: string;
   featured: boolean;
+  /** Ticket pricing, free-form (e.g. "YP $15 · Chamber $25 · Public $40") */
+  price?: string;
+  /** Street address when known */
+  address?: string;
+  /** Direct registration link when different from source_url */
+  registration_url?: string;
+  /** Extra notes, e.g. "Members only · sold out" */
+  note?: string;
+  /** True for seed listings that are not real events yet */
+  placeholder?: boolean;
   /** Map position (optional until geocoded) */
   lat?: number;
   lng?: number;

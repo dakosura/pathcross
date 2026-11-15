@@ -30,15 +30,20 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         <div className="md:col-span-2">
           <h2 className="text-lg font-semibold">About this event</h2>
           <p className="mt-3 leading-relaxed text-bark">{ev.description}</p>
+          {ev.note && <p className="mt-4 rounded-md bg-clay-50 px-4 py-3 text-sm font-medium text-clay-700">{ev.note}</p>}
+          {ev.placeholder && <p className="mt-4 rounded-md bg-sand px-4 py-3 text-sm text-bark">This is a sample listing, not a confirmed event.</p>}
         </div>
         <aside className="h-fit rounded-xl border border-line bg-sand p-6 text-sm">
           <dl className="space-y-4">
             <div><dt className="font-semibold text-ink">When</dt><dd className="text-bark">{formatDate(ev.date, { weekday: "long", year: "numeric" })}<br />{formatRange(ev.start_time, ev.end_time)}</dd></div>
-            <div><dt className="font-semibold text-ink">Where</dt><dd className="text-bark">{ev.location.venue}<br />{ev.location.city}</dd></div>
+            <div><dt className="font-semibold text-ink">Where</dt><dd className="text-bark">{ev.location.venue}<br />{ev.address ?? ev.location.city}</dd></div>
+            {ev.price && <div><dt className="font-semibold text-ink">Price</dt><dd className="text-bark">{ev.price}</dd></div>}
           </dl>
-          <a href={ev.source_url} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-md bg-forest py-3 text-center font-semibold text-white hover:bg-forest-700">
-            View original listing
-          </a>
+          {!ev.placeholder && (
+            <a href={ev.registration_url ?? ev.source_url} target="_blank" rel="noopener noreferrer" className="mt-6 block rounded-md bg-forest py-3 text-center font-semibold text-white hover:bg-forest-700">
+              {ev.registration_url ? "Register" : "View original listing"}
+            </a>
+          )}
         </aside>
       </div>
     </div>

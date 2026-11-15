@@ -11,7 +11,7 @@ export function EventCard({ event }: { event: Event }) {
     >
       <div className="flex items-center justify-between">
         <CategoryBadge category={event.category} />
-        {event.featured && <span className="text-xs font-semibold text-clay-700">★ Featured</span>}
+        {event.placeholder ? <span className="text-xs font-medium text-bark">Sample listing</span> : event.featured && <span className="text-xs font-semibold text-clay-700">★ Featured</span>}
       </div>
       <h3 className="mt-4 text-lg font-semibold leading-snug text-ink group-hover:text-clay">{event.title}</h3>
       <p className="mt-1 text-sm text-bark">by {event.organizer}</p>
