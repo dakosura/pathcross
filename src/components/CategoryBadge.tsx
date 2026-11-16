@@ -1,15 +1,11 @@
 import type { EventCategory } from "@/types";
-
-const styles: Record<EventCategory, string> = {
-  Finance: "bg-moss-50 text-moss",
-  Tech: "bg-sand text-bark",
-  "General Professional": "bg-stone-100 text-stone-700",
-  Startup: "bg-clay-50 text-clay-700",
-};
+import { categoryStyle } from "@/lib/categories";
 
 export function CategoryBadge({ category }: { category: EventCategory }) {
+  const s = categoryStyle[category];
   return (
-    <span className={`inline-block rounded-md px-2.5 py-1 text-xs font-semibold ${styles[category]}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${s.badge}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
       {category}
     </span>
   );

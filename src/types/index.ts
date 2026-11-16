@@ -28,6 +28,10 @@ export interface Event {
   registration_url?: string;
   /** Extra notes, e.g. "Members only · sold out" */
   note?: string;
+  /** Group that hosts it (see src/lib/clubs.ts) */
+  club_id?: string;
+  /** Online-only; no map pin */
+  online?: boolean;
   /** True for seed listings that are not real events yet */
   placeholder?: boolean;
   /** Map position (optional until geocoded) */
@@ -42,4 +46,39 @@ export interface TopList {
   description: string;
   /** Event ids, ranked */
   eventIds: string[];
+}
+
+export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating";
+
+export interface PriceLine {
+  /** e.g. "Monthly membership" */
+  label: string;
+  /** e.g. "$49 / month" */
+  amount: string;
+  note?: string;
+}
+
+/** A club, gym, program or other membership organization in the directory. */
+export interface Club {
+  id: string;
+  name: string;
+  interest: InterestId;
+  blurb: string;
+  /** The organization's own site */
+  url?: string;
+  /** Neighborhood label, or "Online" */
+  area: string;
+  address?: string;
+  /** How to join, eligibility, guest policy. Public info only. */
+  membership?: string;
+  /** Publicly posted prices. Leave empty when not published. */
+  pricing?: PriceLine[];
+  /** ISO date the pricing was last checked */
+  pricing_as_of?: string;
+  /** Page the pricing came from */
+  pricing_source?: string;
+  /** Listed, but details not researched yet */
+  pending?: boolean;
+  lat?: number;
+  lng?: number;
 }

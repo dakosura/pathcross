@@ -71,6 +71,7 @@ const CHAMBER = "Chamber of Commerce Hawaii";
 const realEvents: Event[] = [
   {
     id: "chamber-bah-phad-nov17",
+    club_id: "chamber-hawaii",
     title: "Business After Hours at PHAD Hawaii Appliance",
     category: "General Professional",
     date: "2026-11-17",
@@ -91,6 +92,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-yp-exec-connect-nov19",
+    club_id: "chamber-yp",
     title: "YP Exec Connect Lunch",
     category: "General Professional",
     date: "2026-11-19",
@@ -110,6 +112,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-prediction-markets-dec1",
+    club_id: "chamber-hawaii",
     title: "Can Markets Predict the Future? Prediction Markets Explained",
     category: "Finance",
     date: "2026-12-01",
@@ -129,6 +132,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-yp-syl-dec3",
+    club_id: "chamber-yp",
     title: "YP x Society of Young Leaders Pau Hana",
     category: "General Professional",
     date: "2026-12-03",
@@ -148,6 +152,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-rotary-connect-dec9",
+    club_id: "chamber-yp",
     title: "Rotary Connect: Level Up Your Network + Your Impact",
     category: "General Professional",
     date: "2026-12-09",
@@ -167,6 +172,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-yp-holiday-dec10",
+    club_id: "chamber-yp",
     title: "YP Holiday Party: Electric Wonderland",
     category: "General Professional",
     date: "2026-12-10",
@@ -187,6 +193,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-annual-luncheon-dec8",
+    club_id: "chamber-hawaii",
     title: "176th Annual Membership Luncheon",
     category: "General Professional",
     date: "2026-12-08",
@@ -207,6 +214,7 @@ const realEvents: Event[] = [
   },
   {
     id: "chamber-bah-market-advantage-dec15",
+    club_id: "chamber-hawaii",
     title: "Business After Hours at the 'Alohilani Swell Deck",
     category: "General Professional",
     date: "2026-12-15",
@@ -234,17 +242,34 @@ interface EventRow {
   venue: string; city: string; address: string | null; organizer: string; source_url: string;
   registration_url: string | null; price: string | null; note: string | null;
   category: Event["category"]; featured: boolean; placeholder: boolean; lat: number | null; lng: number | null;
+  source: string | null;
 }
 
-const fromRow = (r: EventRow): Event => ({
+/**
+ * Per-feed details the calendar feeds leave out (Meetup hides venues in ICS).
+ * Applied when reading, so they need no database change. Venues come from each
+ * group's own event descriptions.
+ */
+const sourceDefaults: Record<string, { club_id: string; online?: boolean; venue?: string; address?: string; lat?: number; lng?: number }> = {
+  "meetup-honolulu-tech-network": { club_id: "honolulu-tech-network", venue: "Whole Foods Market Kakaʻako (outdoor café seating)", lat: 21.2947, lng: -157.8527 },
+  "meetup-code-with-aloha": { club_id: "code-with-aloha", venue: "Entrepreneurs Sandbox", address: "643 Ilalo St., Honolulu, HI 96813", lat: 21.2936, lng: -157.864 },
+  "meetup-honolulu-startups": { club_id: "honolulu-startups", online: true, venue: "Online" },
+};
+
+const fromRow = (r: EventRow): Event => {
+  const d = (r.source && sourceDefaults[r.source]) || undefined;
+  const unknownVenue = !r.venue || r.venue === "See event listing";
+  return {
   id: r.id, title: r.title, description: r.description, date: r.date,
   start_time: r.start_time, end_time: r.end_time,
-  location: { venue: r.venue, city: r.city }, city: r.city,
-  address: r.address ?? undefined, organizer: r.organizer, source_url: r.source_url,
+  location: { venue: unknownVenue && d?.venue ? d.venue : r.venue, city: r.city }, city: r.city,
+  address: r.address ?? (unknownVenue ? d?.address : undefined), organizer: r.organizer, source_url: r.source_url,
+  club_id: d?.club_id, online: d?.online,
   registration_url: r.registration_url ?? undefined, price: r.price ?? undefined, note: r.note ?? undefined,
   category: r.category, featured: r.featured, placeholder: r.placeholder || undefined,
-  lat: r.lat ?? undefined, lng: r.lng ?? undefined,
-});
+  lat: r.lat ?? (d?.online ? undefined : d?.lat), lng: r.lng ?? (d?.online ? undefined : d?.lng),
+  };
+};
 
 const todayHST = () => new Date().toLocaleDateString("en-CA", { timeZone: "Pacific/Honolulu" });
 
@@ -281,6 +306,14 @@ export const topLists: TopList[] = [
     eventIds: ["chamber-prediction-markets-dec1", "chamber-bah-phad-nov17", "chamber-yp-syl-dec3", "fin-mixer-1", "fin-planning-1", "fin-estate-1", "gen-breakfast-1", "gen-happy-1", "startup-pitch-1", "tech-meetup-1", "startup-coffee-1", "tech-ai-1"],
   },
 ];
+
+/** Today's date in Honolulu, e.g. "2026-11-15". Cached with the event list. */
+export async function getToday(): Promise<string> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("events");
+  return todayHST();
+}
 
 export async function getEvents(): Promise<Event[]> {
   return [...(await loadUpcoming())].sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));

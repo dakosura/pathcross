@@ -20,6 +20,9 @@
   --color-clay-700: #a05f2e;
   --color-clay-50: #f6eadd;
 
+  --color-lagoon: #2f6f7a;
+  --color-lagoon-50: #e3eef0;
+
   --color-bark: #5c4a3a;
   --color-ink: #2a2419;
 }
@@ -37,3 +40,22 @@
   }
   ::selection { background: var(--color-clay-300); color: var(--color-ink); }
 }
+
+/* Topographic texture for dark bands */
+.bg-topo { background-image: url("/topo.svg"); background-size: cover; background-position: center; }
+
+/* Soft entrance for cards and sections */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes pin-drop { from { opacity: 0; transform: translateY(-14px) scale(0.6); } to { opacity: 1; transform: none; } }
+.pin-drop { animation: pin-drop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+@media (prefers-reduced-motion: reduce) { .rise, .pin-drop { animation: none; } }
+
+/* MapLibre popups in the site's style */
+.maplibregl-popup-content {
+  border-radius: 14px; padding: 14px 16px; background: var(--color-card); color: var(--color-ink);
+  box-shadow: 0 12px 32px rgba(42, 36, 25, 0.18); font-family: var(--font-sans); max-width: 280px;
+}
+.maplibregl-popup-close-button { font-size: 18px; padding: 2px 8px; color: var(--color-bark); }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--color-card); }
+.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--color-card); }
