@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useNetwork } from "@/lib/network";
 import { SignInForm } from "./SignInForm";
@@ -6,6 +7,10 @@ import { SignInForm } from "./SignInForm";
 /** Sign-in prompt shown when a signed-out visitor tries to add something to My Network. */
 export function AuthDialog() {
   const { promptOpen, closePrompt } = useNetwork();
+  const pathname = usePathname();
+
+  // Following a link inside the dialog (terms, privacy) closes it
+  useEffect(() => { closePrompt(); }, [pathname, closePrompt]);
 
   useEffect(() => {
     if (!promptOpen) return;

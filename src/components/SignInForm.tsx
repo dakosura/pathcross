@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { sendSignInLink } from "@/lib/network";
 
@@ -45,7 +46,11 @@ export function SignInForm({ autoFocus = false }: { autoFocus?: boolean }) {
       <button type="submit" disabled={phase === "sending"} className="w-full rounded-full bg-forest px-4 py-3 text-sm font-semibold text-cream transition hover:bg-forest-700 disabled:opacity-60">
         {phase === "sending" ? "Sending…" : "Email me a sign-in link"}
       </button>
-      <p className="text-xs text-bark/80">New here? The same link creates your account. We only use your email to sign you in.</p>
+      <p className="text-xs text-bark/80">
+        New here? The same link creates your account. By continuing you agree to the{" "}
+        <Link href="/terms" className="font-semibold text-clay-700 hover:underline">terms</Link> and{" "}
+        <Link href="/privacy" className="font-semibold text-clay-700 hover:underline">privacy notice</Link>.
+      </p>
     </form>
   );
 }

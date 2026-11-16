@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsButton } from "./CookieConsent";
 
 const columns = [
   { title: "Discover", links: [["Events", "/events"], ["Calendar", "/calendar"], ["Top 10", "/top-10"]] },
@@ -26,9 +27,15 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-cream/10">
-        <p className="mx-auto max-w-6xl px-4 py-5 text-xs text-cream/55 sm:px-6">
-          © PathCross · Honolulu, HI · Listings link to each organizer&apos;s own page. Details can change, so confirm with the organizer.
-        </p>
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-xs text-cream/60 sm:px-6 md:flex-row md:items-center md:justify-between">
+          <p>© PathCross · Honolulu, HI · Listings link to each organizer&apos;s own page. Confirm details with the organizer.</p>
+          <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link href="/privacy" className="hover:text-white">Privacy</Link>
+            <Link href="/terms" className="hover:text-white">Terms</Link>
+            <Link href="/cookies" className="hover:text-white">Cookies</Link>
+            <CookieSettingsButton className="hover:text-white" />
+          </nav>
+        </div>
       </div>
     </footer>
   );

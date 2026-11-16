@@ -1,0 +1,63 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { LegalPage } from "@/components/LegalPage";
+import { site } from "@/lib/site";
+
+export const metadata: Metadata = { title: "Privacy notice", description: "What PathCross collects, why, and the choices you have." };
+
+export default function PrivacyPage() {
+  const mail = <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>;
+  return (
+    <LegalPage title="Privacy notice" current="/privacy" intro="What we collect, why we collect it, and the choices you have. We keep it to the minimum the site needs.">
+      <h2>Who we are</h2>
+      <p>{site.name} is a guide to events, clubs and programs, based in {site.location}. This notice covers {site.url.replace("https://", "")}. You can reach us at {mail}.</p>
+
+      <h2>What we collect</h2>
+      <p>You can browse events, the calendar and Clubs &amp; Programs without giving us anything. We collect information only in these cases:</p>
+      <ul>
+        <li><strong>Your email address</strong>, when you create a login for My Network. We use it to send you sign-in links.</li>
+        <li><strong>Your My Network picks</strong>: the events and clubs you add. They are stored with your account so your map is available on any device.</li>
+        <li><strong>Sign-in details</strong>: the dates you created your account and last signed in, kept by our sign-in provider.</li>
+        <li><strong>Technical data</strong>: like most sites, our hosting provider logs requests, including IP address, browser type and the pages requested. We use this to run and protect the site.</li>
+      </ul>
+      <p>We don&apos;t collect payment details. We don&apos;t ask for your name, phone number or precise location.</p>
+
+      <h2>How we use it</h2>
+      <ul>
+        <li>To sign you in and keep you signed in.</li>
+        <li>To save and show your network.</li>
+        <li>To keep the site working and secure.</li>
+      </ul>
+      <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. We don&apos;t currently use analytics. If we add it, it will only run with your consent, as described in the <Link href="/cookies">cookie policy</Link>.</p>
+
+      <h2>Who helps us run the site</h2>
+      <p>These providers process data for us, or receive requests from your browser when you use the site:</p>
+      <table>
+        <thead><tr><th>Provider</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>Supabase</td><td>Stores accounts and My Network picks, and sends sign-in emails.</td></tr>
+          <tr><td>Vercel</td><td>Hosts the website and keeps request logs.</td></tr>
+          <tr><td>Google Maps Platform</td><td>Supplies the 3D map on the home page. Your browser requests map imagery from Google directly.</td></tr>
+          <tr><td>OpenFreeMap</td><td>Supplies street-map tiles for the other maps. Your browser requests them directly.</td></tr>
+        </tbody>
+      </table>
+      <p>When you follow a &quot;Sign up&quot; or &quot;Visit site&quot; link, you leave {site.name}. The organizer&apos;s own privacy policy applies there.</p>
+
+      <h2>How long we keep it</h2>
+      <p>We keep your email and picks for as long as you have an account. If you ask us to delete your account, we delete both. Hosting logs are kept by our provider for a limited time.</p>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li><strong>See or correct your data</strong>: your picks are visible in My Network, where you can remove any of them.</li>
+        <li><strong>Delete your account</strong>: email {mail} from the address you signed up with and we&apos;ll delete your account and picks.</li>
+        <li><strong>Ask a question or object</strong>: email us and we&apos;ll respond. Depending on where you live, you may have further rights under local law, and we&apos;ll honor them.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>{site.name} is meant for adults. We don&apos;t knowingly collect information from children under 13. If you believe a child has created an account, email us and we&apos;ll remove it.</p>
+
+      <h2>Changes</h2>
+      <p>If we change this notice, we&apos;ll update the date at the top of this page. For significant changes, we&apos;ll also tell account holders by email.</p>
+    </LegalPage>
+  );
+}
