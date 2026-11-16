@@ -6,6 +6,7 @@ import type { Map as MLMap, Marker } from "maplibre-gl";
 import type { Club, Event } from "@/types";
 import { createMap, OAHU } from "@/lib/map";
 import { useNetwork } from "@/lib/network";
+import { SignInForm } from "./SignInForm";
 import { interests, interestById } from "@/lib/interests";
 import { categoryStyle } from "@/lib/categories";
 import { formatDate, formatTime } from "@/lib/format";
@@ -85,7 +86,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
   const [failed, setFailed] = useState(false);
   const [tab, setTab] = useState<"clubs" | "events">("clubs");
   const [q, setQ] = useState("");
-  const { saved, has, toggle, clear } = useNetwork();
+  const { saved, has, toggle, clear, user, status, signOut, error } = useNetwork();
 
   // Everything the visitor has picked that can be placed on the map
   const pins = useMemo<Pin[]>(() => {
@@ -192,6 +193,8 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
   const total = saved.clubs.length + saved.events.length;
   const unmapped = total - pins.length;
 
+  const signedOut = status === "ready" && !user;
+
   return (
     <div className="flex flex-col lg:h-[calc(100dvh-4rem)] lg:flex-row">
       <aside className="order-2 flex min-h-0 min-w-0 flex-col border-line bg-card lg:order-1 lg:w-[400px] lg:shrink-0 lg:border-r">
@@ -199,6 +202,8 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay-700">Oʻahu</p>
           <h1 className="mt-1 text-3xl font-semibold">My Network</h1>
           <p className="mt-2 text-sm text-bark">Pick the clubs you belong to and the events you&apos;re going to. Each one lands on your map.</p>
+          {user && (
+            <>
           <div className="mt-4 flex items-center justify-between gap-3 text-sm">
             <p className="font-medium text-ink">
               {saved.clubs.length} {saved.clubs.length === 1 ? "club" : "clubs"} · {saved.events.length} {saved.events.length === 1 ? "event" : "events"}
@@ -213,7 +218,22 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
             ))}
           </div>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tab === "clubs" ? "Search clubs…" : "Search events…"} aria-label="Search" className="mt-3 w-full rounded-full border border-line bg-white/70 px-4 py-2 text-sm outline-none focus:border-moss" />
+            </>
+          )}
         </div>
+        {status === "loading" && <div className="m-5 h-40 animate-pulse rounded-2xl bg-sand" aria-label="Loading your network" />}
+        {signedOut && (
+          <div className="px-5 py-6">
+            <div className="rounded-2xl border border-line bg-white/60 p-5">
+              <h2 className="text-xl font-semibold">Sign in to build your network</h2>
+              <p className="mt-2 mb-4 text-sm text-bark">Your clubs and events are saved to your account, so your map is there on any device. No password needed.</p>
+              <SignInForm />
+            </div>
+            <p className="mt-4 text-sm text-bark">Just looking? <Link href="/events" className="font-semibold text-clay-700 hover:underline">Events</Link>, the <Link href="/calendar" className="font-semibold text-clay-700 hover:underline">calendar</Link> and <Link href="/clubs" className="font-semibold text-clay-700 hover:underline">Clubs &amp; Programs</Link> are open to everyone.</p>
+          </div>
+        )}
+        {user && error && <p role="alert" className="mx-5 mt-3 rounded-xl bg-clay-50 px-4 py-2.5 text-sm font-medium text-clay-700">{error}</p>}
+        {user && (
         <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3 lg:max-h-none">
           {tab === "clubs" ? (
             interests.map((interest) => {
@@ -239,18 +259,22 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
           )}
           {(tab === "clubs" ? shownClubs.length : shownEvents.length) === 0 && <p className="px-3 py-8 text-center text-sm text-bark">Nothing matches that search.</p>}
         </div>
-        <p className="border-t border-line px-5 py-3 text-xs text-bark/80">
-          Saved in this browser only. Browse more in <Link href="/events" className="font-semibold text-clay-700 hover:underline">Events</Link> or <Link href="/clubs" className="font-semibold text-clay-700 hover:underline">Clubs &amp; Programs</Link>.
-        </p>
+        )}
+        {user && (
+          <p className="flex items-center justify-between gap-3 border-t border-line px-5 py-3 text-xs text-bark/80">
+            <span className="truncate">Signed in as <span className="font-semibold text-ink">{user.email}</span></span>
+            <button type="button" onClick={signOut} className="shrink-0 font-semibold text-clay-700 hover:underline">Sign out</button>
+          </p>
+        )}
       </aside>
 
-      <div className="relative order-1 h-[52dvh] min-w-0 bg-sand lg:order-2 lg:h-auto lg:flex-1">
+      <div className={`relative order-1 h-[52dvh] min-w-0 bg-sand lg:order-2 lg:block lg:h-auto lg:flex-1 ${signedOut ? "hidden" : ""}`}>
         <div ref={el} className="h-full w-full" />
         {failed && <p className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-bark">The map couldn&apos;t load. Your picks are still saved in the list.</p>}
         {ready && pins.length === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-4">
             <p className="rise rounded-full bg-forest/95 px-5 py-2.5 text-center text-sm font-medium text-cream shadow-xl">
-              {total > 0 ? "Your picks are online or don't have a map pin yet." : "Your map is empty. Tap a club or event to place it here."}
+              {!user ? "Sign in, then tap a club or event to place it on your map." : total > 0 ? "Your picks are online or don't have a map pin yet." : "Your map is empty. Tap a club or event to place it here."}
             </p>
           </div>
         )}

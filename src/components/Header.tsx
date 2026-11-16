@@ -14,8 +14,8 @@ const links = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { saved } = useNetwork();
-  const count = saved.events.length + saved.clubs.length;
+  const { saved, user } = useNetwork();
+  const count = user ? saved.events.length + saved.clubs.length : 0;
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (

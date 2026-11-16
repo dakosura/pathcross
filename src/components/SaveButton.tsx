@@ -1,7 +1,7 @@
 "use client";
 import { useNetwork, type NetworkKind } from "@/lib/network";
 
-/** Adds or removes an event or club from the visitor's My Network map. */
+/** Adds or removes an event or club from My Network. Signed-out visitors get the sign-in prompt. */
 export function SaveButton({ kind, id, size = "sm" }: { kind: NetworkKind; id: string; size?: "sm" | "lg" }) {
   const { has, toggle } = useNetwork();
   const on = has(kind, id);
