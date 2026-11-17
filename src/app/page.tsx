@@ -35,6 +35,17 @@ export default async function Home() {
         </dl>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-20">
+        <div className="grid items-center gap-6 rounded-2xl border border-line bg-card p-6 sm:p-8 md:grid-cols-[1fr_auto]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay-700">Made for what you do</p>
+            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">Not every event is worth your evening.</h2>
+            <p className="mt-2 max-w-2xl text-bark">Tell us your profession and what you&apos;re looking for. PathCross rates every event from 1 to 5 stars for meeting people and ranks the ten most worth your time.</p>
+          </div>
+          <Link href="/top-10" className="rounded-full bg-clay px-6 py-3 text-center font-semibold text-white transition hover:bg-clay-700">See my top 10</Link>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <SectionHeading title="Featured events" subtitle="Hand-picked gatherings happening soon in Honolulu." href="/events" />
         <EventGrid events={spotlight} />

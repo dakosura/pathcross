@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
-import type { Event, TopList } from "@/types";
+import type { Event } from "@/types";
 import { supabase } from "./supabase";
 
 const CHAMBER = "Chamber of Commerce Hawaii";
@@ -245,21 +245,6 @@ async function loadUpcoming(): Promise<Event[]> {
 
 export const categories = ["Finance", "Tech", "General Professional", "Startup"] as const;
 
-/**
- * Top 10 lists are ranked from whatever is upcoming, so they never go stale.
- * `weights` scores each category for the audience; featured and in-person
- * events get a small boost, and a weekly series only takes one slot.
- */
-export const topLists: TopList[] = [
-  {
-    slug: "financial-advisors",
-    title: "Top 10 for Financial Advisors",
-    audience: "Financial Advisors",
-    description: "The upcoming Oʻahu events most worth a financial advisor's time: finance topics first, then the broad business mixers where clients and referral partners turn up. Re-ranked every day as events are added.",
-    weights: { Finance: 6, "General Professional": 4, Startup: 2, Tech: 1 },
-  },
-];
-
 /** Today's date in Honolulu, e.g. "2026-11-15". Cached with the event list. */
 export async function getToday(): Promise<string> {
   "use cache";
@@ -278,17 +263,4 @@ export async function getFeaturedEvents(): Promise<Event[]> {
 
 export async function getEvent(id: string): Promise<Event | undefined> {
   return (await loadUpcoming()).find((ev) => ev.id === id);
-}
-
-export async function getTopList(slug: string) {
-  const list = topLists.find((l) => l.slug === slug);
-  if (!list) return undefined;
-  const score = (ev: Event) => (list.weights[ev.category] ?? 0) + (ev.featured ? 2 : 0) + (ev.online ? -3 : 1);
-  const seen = new Set<string>();
-  const items = (await getEvents())
-    // Soonest occurrence of each repeating event only.
-    .filter((ev) => { const k = `${ev.organizer}|${ev.title}`; if (seen.has(k)) return false; seen.add(k); return true; })
-    .sort((a, b) => score(b) - score(a) || a.date.localeCompare(b.date))
-    .slice(0, 10);
-  return { ...list, items };
 }

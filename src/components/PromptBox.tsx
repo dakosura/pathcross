@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const suggestions = ["Financial advisor mixers", "Startup founders", "Casual happy hours"];
+const suggestions = ["Business mixers", "Startup founders", "Casual happy hours"];
 
 export function PromptBox() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export function PromptBox() {
           id="prompt"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="What kind of networking are you looking for?"
+          placeholder="What are you looking for?"
           className="min-w-0 flex-1 rounded-xl px-4 py-3 text-sm sm:text-base text-ink outline-none placeholder:text-bark/60"
         />
         <button type="submit" className="rounded-lg bg-clay px-6 py-3 font-semibold text-white hover:bg-clay-700">

@@ -1,13 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { sendSignInLink } from "@/lib/network";
+import { sendSignInLink, useNetwork } from "@/lib/network";
+import { hasProfile } from "@/lib/profile";
+import { ProfileFields } from "./ProfileFields";
 
 /** Passwordless sign-in: emails a one-time link. First use creates the account. */
 export function SignInForm({ autoFocus = false }: { autoFocus?: boolean }) {
   const [email, setEmail] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
+  const { profile, saveProfile } = useNetwork();
+  // Open for newcomers; folded away once this browser already has answers.
+  const [aboutOpen, setAboutOpen] = useState(() => !hasProfile(profile));
 
   if (phase === "sent") {
     return (
@@ -42,6 +47,14 @@ export function SignInForm({ autoFocus = false }: { autoFocus?: boolean }) {
         placeholder="you@example.com"
         className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none focus:border-moss"
       />
+      <details className="group rounded-xl bg-sand px-4 py-3" open={aboutOpen} onToggle={(e) => setAboutOpen(e.currentTarget.open)}>
+        <summary className="cursor-pointer list-none text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          New here? Tell us about you <span className="font-normal text-bark">(optional)</span>
+          <span aria-hidden="true" className="float-right text-bark group-open:hidden">＋</span>
+        </summary>
+        <p className="mb-4 mt-1 text-xs text-bark">We use this to rate and rank events for you. You can change it any time.</p>
+        <ProfileFields value={profile} onChange={saveProfile} idPrefix="signin" />
+      </details>
       {error && <p role="alert" className="text-sm font-medium text-clay-700">{error}</p>}
       <button type="submit" disabled={phase === "sending"} className="w-full rounded-full bg-forest px-4 py-3 text-sm font-semibold text-cream transition hover:bg-forest-700 disabled:opacity-60">
         {phase === "sending" ? "Sending…" : "Email me a sign-in link"}

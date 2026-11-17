@@ -39,15 +39,6 @@ export interface Event {
   lng?: number;
 }
 
-export interface TopList {
-  slug: string;
-  title: string;
-  audience: string;
-  description: string;
-  /** How much each event category matters to this audience (higher ranks first) */
-  weights: Partial<Record<EventCategory, number>>;
-}
-
 export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating";
 
 export interface PriceLine {

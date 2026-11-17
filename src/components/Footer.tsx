@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CookieSettingsButton } from "./CookieConsent";
 
 const columns = [
-  { title: "Discover", links: [["Events", "/events"], ["Calendar", "/calendar"], ["Top 10", "/top-10"]] },
+  { title: "Discover", links: [["Events", "/events"], ["Calendar", "/calendar"], ["Top 10 for you", "/top-10"]] },
   { title: "Clubs & Programs", links: [["All interests", "/clubs"], ["Professional groups", "/clubs/professional"], ["Gyms & fitness", "/clubs/fitness"], ["Golf clubs", "/clubs/golf"]] },
   { title: "PathCross", links: [["My Network", "/my-network"], ["How it works", "/about"]] },
 ];
@@ -13,7 +13,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <p className="font-display text-2xl font-semibold">Path<span className="text-clay-300">Cross</span></p>
-          <p className="mt-3 max-w-xs text-sm text-cream/70">A curated guide to the events, clubs and communities worth showing up for. Starting on Oʻahu.</p>
+          <p className="mt-3 max-w-xs text-sm text-cream/70">The most efficient way to find networking events and groups in Honolulu, rated and ranked for what you do.</p>
         </div>
         {columns.map((c) => (
           <div key={c.title}>

@@ -1,6 +1,7 @@
 "use client";
 import { useSyncExternalStore } from "react";
 import { supabase } from "./supabase";
+import { EMPTY_PROFILE, hasProfile, parseProfile, type Profile } from "./profile";
 
 /**
  * "My Network" picks, stored per signed-in user in Supabase (table
@@ -16,15 +17,18 @@ interface State {
   status: "loading" | "ready";
   user: { id: string; email: string } | null;
   saved: SavedNetwork;
+  /** Profession and goals. Kept in the account when signed in, else in this browser. */
+  profile: Profile;
   promptOpen: boolean;
   /** Set when saving to the account failed */
   error: string | null;
 }
 
 const EMPTY: SavedNetwork = { events: [], clubs: [] };
-const SERVER: State = { status: "loading", user: null, saved: EMPTY, promptOpen: false, error: null };
+const SERVER: State = { status: "loading", user: null, saved: EMPTY, profile: EMPTY_PROFILE, promptOpen: false, error: null };
 const PENDING_KEY = "pathcross.network.pending";
 const LEGACY_KEY = "pathcross.network.v1"; // picks made before accounts existed
+const PROFILE_KEY = "pathcross.profile.v1";
 
 let state: State = SERVER;
 let started = false;
@@ -71,19 +75,41 @@ async function loadFor(user: { id: string; email: string }) {
   set({ status: "ready", saved, error: null });
 }
 
+function localProfile(): Profile {
+  try { return parseProfile(JSON.parse(window.localStorage.getItem(PROFILE_KEY) ?? "null")); } catch { return EMPTY_PROFILE; }
+}
+
 function start() {
   if (started) return;
   started = true;
+  const local = localProfile();
+  if (hasProfile(local)) set({ profile: local });
   if (!supabase) return set({ status: "ready" });
-  supabase.auth.onAuthStateChange((_event, session) => {
+  const client = supabase;
+  client.auth.onAuthStateChange((_event, session) => {
     const u = session?.user;
     const next = u ? { id: u.id, email: u.email ?? "" } : null;
     if (next?.id === state.user?.id && state.status === "ready") return;
     if (!next) return set({ status: "ready", user: null, saved: EMPTY });
-    set({ user: next, promptOpen: false });
+    // The account's profile wins; answers given before signing in fill an empty one.
+    const fromAccount = parseProfile(u?.user_metadata);
+    const adopt = !hasProfile(fromAccount) && hasProfile(state.profile);
+    set({ user: next, promptOpen: false, profile: hasProfile(fromAccount) ? fromAccount : state.profile });
     // Deferred: Supabase calls made inside this callback can deadlock
-    setTimeout(() => void loadFor(next), 0);
+    setTimeout(() => {
+      void loadFor(next);
+      if (adopt) void client.auth.updateUser({ data: { profession: state.profile.profession ?? null, goals: state.profile.goals } });
+    }, 0);
   });
+}
+
+/** Saves profession and goals: to the account when signed in, and always to this browser. */
+async function saveProfile(profile: Profile) {
+  set({ profile, error: null });
+  try { window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch { /* storage blocked */ }
+  if (!state.user || !supabase) return;
+  const { error } = await supabase.auth.updateUser({ data: { profession: profile.profession ?? null, goals: profile.goals } });
+  if (error) set({ error: "We couldn't save your profile. Please try again." });
 }
 
 function subscribe(cb: () => void) {
@@ -119,9 +145,11 @@ async function clear() {
 /** Emails a one-time sign-in link. Creates the account on first use. */
 export async function sendSignInLink(email: string): Promise<string | null> {
   if (!supabase) return "Sign-in isn't set up yet.";
+  const p = state.profile;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}/my-network` },
+    // `data` is stored on the account only when this email is new.
+    options: { emailRedirectTo: `${window.location.origin}/my-network`, ...(hasProfile(p) ? { data: { profession: p.profession ?? null, goals: p.goals } } : {}) },
   });
   if (!error) return null;
   return error.status === 429 ? "Too many sign-in emails were requested. Please wait a few minutes and try again." : "We couldn't send the email. Check the address and try again.";
@@ -138,6 +166,7 @@ export function useNetwork() {
     has: (kind: NetworkKind, id: string) => s.saved[kind].includes(id),
     toggle,
     clear,
+    saveProfile,
     openPrompt,
     closePrompt,
     signOut,

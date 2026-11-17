@@ -3,6 +3,7 @@ import type { Event } from "@/types";
 import { formatRange } from "@/lib/format";
 import { CategoryBadge } from "./CategoryBadge";
 import { DateBlock } from "./DateBlock";
+import { EventRating } from "./EventRating";
 import { SaveButton } from "./SaveButton";
 import { SignupLink } from "./SignupLink";
 
@@ -17,7 +18,7 @@ export function EventCard({ event }: { event: Event }) {
             {event.placeholder ? (
               <span className="text-xs font-medium text-bark">Sample listing</span>
             ) : event.featured ? (
-              <span className="text-xs font-semibold text-clay-700">★ Featured</span>
+              <span className="text-xs font-semibold text-clay-700">Featured</span>
             ) : null}
           </div>
           <h3 className="mt-2 text-lg font-semibold leading-snug text-ink">
@@ -32,6 +33,7 @@ export function EventCard({ event }: { event: Event }) {
         <div className="flex gap-2"><dt className="sr-only">Time</dt><span aria-hidden="true">◷</span><dd>{formatRange(event.start_time, event.end_time)}</dd></div>
         <div className="flex gap-2"><dt className="sr-only">Place</dt><span aria-hidden="true">⌖</span><dd className="line-clamp-1">{event.online ? "Online" : `${event.location.venue}, ${event.location.city}`}</dd></div>
       </dl>
+      <div className="relative z-10 mt-4 border-t border-line pt-3"><EventRating event={event} /></div>
       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <SaveButton kind="events" id={event.id} />
         <SignupLink event={event} />

@@ -17,6 +17,7 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Your email address</strong>, when you create a login for My Network. We use it to send you sign-in links.</li>
         <li><strong>Your My Network picks</strong>: the events and clubs you add. They are stored with your account so your map is available on any device.</li>
+        <li><strong>Your profession and what you&apos;re looking for</strong>, if you choose to tell us. They are optional and used only to rate and rank events for you. They are kept in your browser, and with your account once you create one.</li>
         <li><strong>Sign-in details</strong>: the dates you created your account and last signed in, kept by our sign-in provider.</li>
         <li><strong>Technical data</strong>: like most sites, our hosting provider logs requests, including IP address, browser type and the pages requested. We use this to run and protect the site.</li>
       </ul>
@@ -26,6 +27,7 @@ export default function PrivacyPage() {
       <ul>
         <li>To sign you in and keep you signed in.</li>
         <li>To save and show your network.</li>
+        <li>To tailor event ratings and your Top 10 to you.</li>
         <li>To keep the site working and secure.</li>
       </ul>
       <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. We don&apos;t currently use analytics. If we add it, it will only run with your consent, as described in the <Link href="/cookies">cookie policy</Link>.</p>
@@ -44,11 +46,11 @@ export default function PrivacyPage() {
       <p>When you follow a &quot;Sign up&quot; or &quot;Visit site&quot; link, you leave {site.name}. The organizer&apos;s own privacy policy applies there.</p>
 
       <h2>How long we keep it</h2>
-      <p>We keep your email and picks for as long as you have an account. If you ask us to delete your account, we delete both. Hosting logs are kept by our provider for a limited time.</p>
+      <p>We keep your email, picks and profile answers for as long as you have an account. If you ask us to delete your account, we delete both. Hosting logs are kept by our provider for a limited time.</p>
 
       <h2>Your choices</h2>
       <ul>
-        <li><strong>See or correct your data</strong>: your picks are visible in My Network, where you can remove any of them.</li>
+        <li><strong>See or correct your data</strong>: your picks are visible in My Network, where you can remove any of them. Your profession and goals can be changed or cleared on the Top 10 page.</li>
         <li><strong>Delete your account</strong>: email {mail} from the address you signed up with and we&apos;ll delete your account and picks.</li>
         <li><strong>Ask a question or object</strong>: email us and we&apos;ll respond. Depending on where you live, you may have further rights under local law, and we&apos;ll honor them.</li>
       </ul>

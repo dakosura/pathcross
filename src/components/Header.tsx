@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -8,6 +9,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/calendar", label: "Calendar" },
   { href: "/clubs", label: "Clubs & Programs" },
+  { href: "/top-10", label: "For you" },
   { href: "/about", label: "How it works" },
 ];
 
@@ -22,7 +24,7 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-line bg-card/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-ink">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-forest text-sm text-cream">P</span>
+          <Image src="/brand/mark-192.png" alt="" width={36} height={36} priority className="h-9 w-9 rounded-lg" />
           <span>Path<span className="text-clay-700">Cross</span></span>
         </Link>
         <nav className="hidden items-center gap-1 text-sm font-medium lg:flex" aria-label="Main">

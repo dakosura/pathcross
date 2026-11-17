@@ -3,11 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { DateBlock } from "@/components/DateBlock";
+import { EventInsights } from "@/components/EventRating";
 import { SaveButton } from "@/components/SaveButton";
 import { SignupLink } from "@/components/SignupLink";
 import { clubById } from "@/lib/clubs";
 import { events, getEvent } from "@/lib/data";
 import { formatDate, formatRange } from "@/lib/format";
+import { site } from "@/lib/site";
+import type { Event } from "@/types";
 
 export function generateStaticParams() {
   return events.map((e) => ({ id: e.id }));
@@ -16,7 +19,34 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/events/[id]">) {
   const { id } = await params;
   const ev = await getEvent(id);
-  return { title: ev?.title ?? "Event" };
+  if (!ev) return { title: "Event" };
+  const where = ev.online ? "Online" : `${ev.location.venue}, ${ev.location.city}`;
+  const summary = ev.description.replace(/\s+/g, " ").slice(0, 110).trim();
+  return {
+    title: `${ev.title}, ${formatDate(ev.date, { year: "numeric" })}`,
+    description: `${formatDate(ev.date, { weekday: "long" })} at ${where}. ${summary}${summary.length >= 110 ? "…" : ""}`,
+  };
+}
+
+/** schema.org Event data, which lets Google show the date and place in results. */
+function eventJsonLd(ev: Event) {
+  // Hawaiʻi has no daylight saving, so the offset is always -10:00.
+  const at = (t: string) => `${ev.date}T${t}:00-10:00`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: ev.title,
+    description: ev.description.slice(0, 500) || undefined,
+    startDate: at(ev.start_time),
+    endDate: ev.end_time !== ev.start_time ? at(ev.end_time) : undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: `https://schema.org/${ev.online ? "OnlineEventAttendanceMode" : "OfflineEventAttendanceMode"}`,
+    location: ev.online
+      ? { "@type": "VirtualLocation", url: ev.registration_url ?? ev.source_url }
+      : { "@type": "Place", name: ev.location.venue, address: ev.address ?? `${ev.location.city}, HI` },
+    organizer: { "@type": "Organization", name: ev.organizer, url: ev.source_url },
+    url: `${site.url}/events/${ev.id}`,
+  };
 }
 
 // `params` is read inside <Suspense> so navigation to this route stays instant.
@@ -36,6 +66,7 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
 
   return (
     <>
+      {!ev.placeholder && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd(ev)).replace(/</g, "\\u003c") }} />}
       <div className="bg-forest bg-topo text-cream">
         <div className="rise mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
           <Link href="/events" className="text-sm font-medium text-clay-300 hover:text-white">← All events</Link>
@@ -56,6 +87,7 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
           <p className="mt-3 whitespace-pre-line leading-relaxed text-bark">{ev.description || "See the organizer's listing for details."}</p>
           {ev.note && <p className="mt-4 rounded-xl bg-clay-50 px-4 py-3 text-sm font-medium text-clay-700">{ev.note}</p>}
           {ev.placeholder && <p className="mt-4 rounded-xl bg-sand px-4 py-3 text-sm text-bark">This is a sample listing, not a confirmed event.</p>}
+          {!ev.placeholder && <div className="mt-8"><EventInsights event={ev} /></div>}
           {club && (
             <p className="mt-8 text-sm text-bark">
               Hosted by{" "}
