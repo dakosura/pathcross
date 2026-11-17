@@ -56,9 +56,18 @@ async function Content({ params }: Pick<PageProps<"/clubs/[interest]/[id]">, "pa
             {club.pending && <p className="mt-4 rounded-xl bg-sand px-4 py-3 text-sm text-bark">We&apos;re still gathering public details for this listing.</p>}
           </section>
 
+          {club.facilities?.length ? (
+            <section>
+              <h2 className="text-lg font-semibold">What&apos;s there</h2>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {club.facilities.map((f) => <li key={f} className={`rounded-full px-3 py-1.5 text-sm font-medium ${interest.badge}`}>{f}</li>)}
+              </ul>
+            </section>
+          ) : null}
+
           {club.membership && (
             <section>
-              <h2 className="text-lg font-semibold">Membership</h2>
+              <h2 className="text-lg font-semibold">How to join</h2>
               <p className="mt-3 leading-relaxed text-bark">{club.membership}</p>
             </section>
           )}
@@ -90,6 +99,7 @@ async function Content({ params }: Pick<PageProps<"/clubs/[interest]/[id]">, "pa
         <aside className="h-fit space-y-4 rounded-2xl border border-line bg-sand p-6 text-sm">
           <dl className="space-y-4">
             <div><dt className="font-semibold text-ink">Where</dt><dd className="text-bark">{club.address ?? club.area}</dd></div>
+            {club.phone && <div><dt className="font-semibold text-ink">Phone</dt><dd className="text-bark"><a href={`tel:${club.phone.replace(/[^0-9+]/g, "")}`} className="hover:underline">{club.phone}</a></dd></div>}
             <div><dt className="font-semibold text-ink">Category</dt><dd className="text-bark">{interest.name}</dd></div>
           </dl>
           {club.url && (

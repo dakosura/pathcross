@@ -1,6 +1,9 @@
 import { revalidateTag } from "next/cache";
 import { runIngest } from "@/lib/ingest/run";
 
+// Reading every source takes a while (one request per Chamber event page).
+export const maxDuration = 60;
+
 // Called daily by Vercel Cron (see vercel.json). Vercel sends
 // `Authorization: Bearer $CRON_SECRET`; anything else is rejected.
 export async function GET(request: Request) {

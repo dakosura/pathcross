@@ -2,72 +2,14 @@ import { cacheLife, cacheTag } from "next/cache";
 import type { Event, TopList } from "@/types";
 import { supabase } from "./supabase";
 
-// Placeholder seed data. Swap these functions for Supabase queries later;
-// pages only depend on the function signatures.
-const e = (
-  id: string,
-  title: string,
-  category: Event["category"],
-  date: string,
-  start_time: string,
-  end_time: string,
-  venue: string,
-  organizer: string,
-  featured = false,
-): Event => ({
-  id,
-  title,
-  category,
-  date,
-  start_time,
-  end_time,
-  location: { venue, city: "Honolulu" },
-  organizer,
-  source_url: "https://example.com",
-  city: "Honolulu",
-  featured,
-  placeholder: true,
-  description:
-    "Placeholder description. Meet local professionals, trade ideas, and build relationships in a relaxed setting. Real event details will be added during curation.",
-});
-
-// Placeholder coordinates [lat, lng] per event
-const coords: Record<string, [number, number]> = {
-  "waikiki-happy-hour": [21.2720, -157.8211],
-  "fin-mixer-1": [21.3068, -157.8654],
-  "tech-meetup-1": [21.2955, -157.8567],
-  "startup-pitch-1": [21.2905, -157.853],
-  "gen-breakfast-1": [21.3092, -157.8601],
-  "fin-planning-1": [21.2793, -157.8294],
-  "gen-happy-1": [21.3, -157.859],
-  "tech-ai-1": [21.3011, -157.8588],
-  "startup-coffee-1": [21.2987, -157.8612],
-  "fin-estate-1": [21.3086, -157.8618],
-};
-
-const baseEvents: Event[] = [
-  e("waikiki-happy-hour", "Sunset Happy Hour on the Deck", "General Professional", "2026-11-18", "17:00", "19:00", "DECK. at Queen Kapiʻolani Hotel", "Placeholder YP Club", true),
-  e("fin-mixer-1", "Financial Advisors Mixer", "Finance", "2026-11-19", "17:30", "19:30", "Aloha Tower Marketplace", "Placeholder Advisors Group", true),
-  e("tech-meetup-1", "Island Tech Meetup", "Tech", "2026-11-20", "18:00", "20:00", "Kakaʻako Coworking Hub", "Placeholder Tech Collective", true),
-  e("startup-pitch-1", "Startup Pitch Night", "Startup", "2026-11-24", "18:30", "21:00", "Ward Village Event Space", "Placeholder Founders Network", true),
-  e("gen-breakfast-1", "Downtown Professionals Breakfast", "General Professional", "2026-11-26", "07:30", "09:00", "Downtown Café Venue", "Placeholder Chamber Group"),
-  e("fin-planning-1", "Retirement Planning Roundtable", "Finance", "2026-12-02", "12:00", "13:30", "Waikīkī Business Lounge", "Placeholder CFP Chapter", true),
-  e("gen-happy-1", "Young Professionals Happy Hour", "General Professional", "2026-12-04", "17:00", "19:00", "Rooftop Bar, Honolulu", "Placeholder YP Club"),
-  e("tech-ai-1", "AI in Business Workshop", "Tech", "2026-12-09", "17:30", "19:30", "Innovation Center Honolulu", "Placeholder AI Guild"),
-  e("startup-coffee-1", "Founders Coffee Chat", "Startup", "2026-12-11", "08:00", "09:30", "Local Coffee Roastery", "Placeholder Founders Network"),
-  e("fin-estate-1", "Estate & Wealth Planning Panel", "Finance", "2026-12-16", "17:30", "19:30", "Bishop Street Conference Room", "Placeholder Advisors Group"),
-];
-
-
-const placeholderEvents = baseEvents.map((ev) => {
-  const c = coords[ev.id];
-  return c ? { ...ev, lat: c[0], lng: c[1] } : ev;
-});
-
 const CHAMBER = "Chamber of Commerce Hawaii";
 
-// Real listings, verified against the organizer's own event pages (Nov 2026).
-// Coordinates are approximate (street-level), used only for the map hero.
+// Hand-edited listings for Chamber events: tidier descriptions and prices than
+// the automatic import produces, plus a map position. The Chamber calendar is
+// also imported daily (see src/lib/ingest/sources.ts); when an imported event
+// has the same source_url as one below, the version below is shown. New Chamber
+// events appear on their own, so this list never has to be kept complete.
+// Coordinates were geocoded from each street address (OpenStreetMap).
 const realEvents: Event[] = [
   {
     id: "chamber-bah-phad-nov17",
@@ -87,8 +29,8 @@ const realEvents: Event[] = [
     price: "Advance: YP $15 · Chamber $25 · Public $40. At the door: $25 / $35 / $50.",
     description:
       "A relaxed evening mixer in the PHAD showroom with a guided tour, live appliance demos, a scavenger hunt and giveaways, plus refreshments. A good low-pressure way to meet a broad cross-section of Oʻahu business owners and professionals.",
-    lat: 21.3855,
-    lng: -157.919,
+    lat: 21.3744,
+    lng: -157.90186,
   },
   {
     id: "chamber-yp-exec-connect-nov19",
@@ -127,8 +69,8 @@ const realEvents: Event[] = [
     price: "Advance: YP $30 · Chamber $40. At the door: $40 / $50.",
     description:
       "How prediction markets work, what shapes their outcomes, and what they could mean for Hawaiʻi businesses and policymakers. Includes a panel Q&A with industry and government leaders, with food, drinks and networking.",
-    lat: 21.2765,
-    lng: -157.8236,
+    lat: 21.27846,
+    lng: -157.82446,
   },
   {
     id: "chamber-yp-syl-dec3",
@@ -147,8 +89,8 @@ const realEvents: Event[] = [
     price: "Online: YP $15 · Public $30. At the door: $25 / $40.",
     description:
       "A joint general membership meeting celebrating a year of community impact. Hear Aloha United Way's 2027 vision, talk with nonprofit leaders, and enjoy pupus with a signature cocktail.",
-    lat: 21.2975,
-    lng: -157.8605,
+    lat: 21.29769,
+    lng: -157.86045,
   },
   {
     id: "chamber-rotary-connect-dec9",
@@ -167,8 +109,8 @@ const realEvents: Event[] = [
     price: "Free for YP members · $15 for Rotarians and guests",
     description:
       "Five downtown Honolulu Rotary clubs host young professionals for networking games with prize drawings, conversations with each club to find the best fit, pupus and a no-host bar. Parking is not included.",
-    lat: 21.3087,
-    lng: -157.8626,
+    lat: 21.30779,
+    lng: -157.86049,
   },
   {
     id: "chamber-yp-holiday-dec10",
@@ -188,8 +130,8 @@ const realEvents: Event[] = [
     note: "21+ with valid photo ID.",
     description:
       "The YP year-end party: neon decor, food, drinks, music and prizes. Registration includes two drink tickets and heavy pupus.",
-    lat: 21.3187,
-    lng: -157.8745,
+    lat: 21.3154,
+    lng: -157.8704,
   },
   {
     id: "chamber-annual-luncheon-dec8",
@@ -209,8 +151,8 @@ const realEvents: Event[] = [
     note: "Expo and networking from 9:00 AM; luncheon 11:30 AM to 1:30 PM.",
     description:
       "The Chamber's flagship annual gathering, in a holiday edition: exhibitor networking, a keynote on AI for business by Dan Tadross, and award presentations.",
-    lat: 21.2829,
-    lng: -157.8394,
+    lat: 21.28318,
+    lng: -157.83572,
   },
   {
     id: "chamber-bah-market-advantage-dec15",
@@ -229,13 +171,13 @@ const realEvents: Event[] = [
     price: "YP $25 · Chamber $35 · Non-member $50 (same at the door)",
     description:
       "A holiday-themed oceanfront networking evening in Waikīkī with a tasting area, a raffle and a collection drive supporting The Salvation Army.",
-    lat: 21.2745,
-    lng: -157.8225,
+    lat: 21.27608,
+    lng: -157.82575,
   },
 ];
 
-/** Seed data: hand-verified listings plus clearly-labelled samples. */
-export const events: Event[] = [...realEvents, ...placeholderEvents];
+/** Hand-verified listings. Also the fallback when the database is unreachable. */
+export const events: Event[] = realEvents;
 
 interface EventRow {
   id: string; title: string; description: string; date: string; start_time: string; end_time: string;
@@ -252,9 +194,14 @@ interface EventRow {
  */
 const sourceDefaults: Record<string, { club_id: string; online?: boolean; venue?: string; address?: string; lat?: number; lng?: number }> = {
   "meetup-honolulu-tech-network": { club_id: "honolulu-tech-network", venue: "Whole Foods Market Kakaʻako (outdoor café seating)", lat: 21.2947, lng: -157.8527 },
-  "meetup-code-with-aloha": { club_id: "code-with-aloha", venue: "Entrepreneurs Sandbox", address: "643 Ilalo St., Honolulu, HI 96813", lat: 21.2936, lng: -157.864 },
+  "meetup-code-with-aloha": { club_id: "code-with-aloha", venue: "Entrepreneurs Sandbox", address: "643 Ilalo St., Honolulu, HI 96813", lat: 21.29684, lng: -157.86349 },
   "meetup-honolulu-startups": { club_id: "honolulu-startups", online: true, venue: "Online" },
+  "chamber-hawaii": { club_id: "chamber-hawaii" },
 };
+
+/** Chamber events run by its Young Professionals program are titled "YP ...". */
+const clubFor = (r: EventRow, fallback?: string) =>
+  r.source === "chamber-hawaii" && /^YP\b/.test(r.title) ? "chamber-yp" : fallback;
 
 const fromRow = (r: EventRow): Event => {
   const d = (r.source && sourceDefaults[r.source]) || undefined;
@@ -264,7 +211,7 @@ const fromRow = (r: EventRow): Event => {
   start_time: r.start_time, end_time: r.end_time,
   location: { venue: unknownVenue && d?.venue ? d.venue : r.venue, city: r.city }, city: r.city,
   address: r.address ?? (unknownVenue ? d?.address : undefined), organizer: r.organizer, source_url: r.source_url,
-  club_id: d?.club_id, online: d?.online,
+  club_id: clubFor(r, d?.club_id), online: d?.online || /^(zoom|online|virtual|webinar)\b/i.test(r.venue) || undefined,
   registration_url: r.registration_url ?? undefined, price: r.price ?? undefined, note: r.note ?? undefined,
   category: r.category, featured: r.featured, placeholder: r.placeholder || undefined,
   lat: r.lat ?? (d?.online ? undefined : d?.lat), lng: r.lng ?? (d?.online ? undefined : d?.lng),
@@ -287,9 +234,10 @@ async function loadUpcoming(): Promise<Event[]> {
   if (supabase) {
     const { data, error } = await supabase.from("events").select("*").eq("status", "active").gte("date", today);
     if (!error && data && data.length) {
-      const db = (data as EventRow[]).map(fromRow);
-      const ids = new Set(db.map((e) => e.id));
-      list = [...realEvents.filter((e) => !ids.has(e.id)), ...db];
+      // Hand-edited listings win over the imported copy of the same event.
+      const curated = new Set(realEvents.flatMap((e) => [e.id, e.source_url]));
+      const db = (data as EventRow[]).map(fromRow).filter((e) => !curated.has(e.id) && !curated.has(e.source_url));
+      list = [...realEvents, ...db];
     }
   }
   return list.filter((e) => e.date >= today);
@@ -297,13 +245,18 @@ async function loadUpcoming(): Promise<Event[]> {
 
 export const categories = ["Finance", "Tech", "General Professional", "Startup"] as const;
 
+/**
+ * Top 10 lists are ranked from whatever is upcoming, so they never go stale.
+ * `weights` scores each category for the audience; featured and in-person
+ * events get a small boost, and a weekly series only takes one slot.
+ */
 export const topLists: TopList[] = [
   {
     slug: "financial-advisors",
     title: "Top 10 for Financial Advisors",
     audience: "Financial Advisors",
-    description: "Upcoming Honolulu events worth a financial advisor's time. Real listings come first; sample listings fill the rest until more are verified.",
-    eventIds: ["chamber-prediction-markets-dec1", "chamber-bah-phad-nov17", "chamber-yp-syl-dec3", "fin-mixer-1", "fin-planning-1", "fin-estate-1", "gen-breakfast-1", "gen-happy-1", "startup-pitch-1", "tech-meetup-1", "startup-coffee-1", "tech-ai-1"],
+    description: "The upcoming Oʻahu events most worth a financial advisor's time: finance topics first, then the broad business mixers where clients and referral partners turn up. Re-ranked every day as events are added.",
+    weights: { Finance: 6, "General Professional": 4, Startup: 2, Tech: 1 },
   },
 ];
 
@@ -330,9 +283,12 @@ export async function getEvent(id: string): Promise<Event | undefined> {
 export async function getTopList(slug: string) {
   const list = topLists.find((l) => l.slug === slug);
   if (!list) return undefined;
-  const all = await loadUpcoming();
-  const items = list.eventIds
-    .map((id) => all.find((ev) => ev.id === id))
-    .filter((x): x is Event => Boolean(x));
+  const score = (ev: Event) => (list.weights[ev.category] ?? 0) + (ev.featured ? 2 : 0) + (ev.online ? -3 : 1);
+  const seen = new Set<string>();
+  const items = (await getEvents())
+    // Soonest occurrence of each repeating event only.
+    .filter((ev) => { const k = `${ev.organizer}|${ev.title}`; if (seen.has(k)) return false; seen.add(k); return true; })
+    .sort((a, b) => score(b) - score(a) || a.date.localeCompare(b.date))
+    .slice(0, 10);
   return { ...list, items };
 }

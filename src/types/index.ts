@@ -44,8 +44,8 @@ export interface TopList {
   title: string;
   audience: string;
   description: string;
-  /** Event ids, ranked */
-  eventIds: string[];
+  /** How much each event category matters to this audience (higher ranks first) */
+  weights: Partial<Record<EventCategory, number>>;
 }
 
 export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating";
@@ -77,6 +77,9 @@ export interface Club {
   pricing_as_of?: string;
   /** Page the pricing came from */
   pricing_source?: string;
+  /** What is on site or on offer, as short labels (e.g. "Pool", "Dining") */
+  facilities?: string[];
+  phone?: string;
   /** Listed, but details not researched yet */
   pending?: boolean;
   lat?: number;

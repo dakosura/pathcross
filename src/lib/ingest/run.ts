@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { IngestedEvent } from "./types";
 import { parseIcs } from "./ics";
 import { fetchEventbriteOrg } from "./eventbrite";
+import { fetchMicrodataCalendar } from "./microdata";
 import { sources, type Source } from "./sources";
 
 export interface SourceReport { source: string; fetched: number; inserted: number; updated: number; removed: number; error?: string }
@@ -19,6 +20,7 @@ async function fetchSource(s: Source): Promise<IngestedEvent[]> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return parseIcs(await res.text(), s);
   }
+  if (s.type === "microdata") return fetchMicrodataCalendar(s);
   const token = process.env.EVENTBRITE_TOKEN;
   if (!token) throw new Error("EVENTBRITE_TOKEN not set");
   return fetchEventbriteOrg(s.orgId, token, s);
