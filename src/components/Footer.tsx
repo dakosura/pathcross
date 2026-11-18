@@ -2,8 +2,8 @@ import Link from "next/link";
 import { CookieSettingsButton } from "./CookieConsent";
 
 const columns = [
-  { title: "Discover", links: [["Events", "/events"], ["Calendar", "/calendar"], ["Top 10 for you", "/top-10"]] },
-  { title: "Clubs & Programs", links: [["All interests", "/clubs"], ["Professional groups", "/clubs/professional"], ["Gyms & fitness", "/clubs/fitness"], ["Golf clubs", "/clubs/golf"]] },
+  { title: "Discover", links: [["Events", "/events"], ["Calendar", "/calendar"], ["Weekly lineup", "/weekly"], ["Top 10 for you", "/top-10"]] },
+  { title: "Clubs & Programs", links: [["All interests", "/clubs"], ["Professional groups", "/clubs/professional"], ["Gyms & fitness", "/clubs/fitness"], ["Golf clubs", "/clubs/golf"], ["Volunteering", "/clubs/volunteer"]] },
   { title: "PathCross", links: [["My Network", "/my-network"], ["How it works", "/about"]] },
 ];
 

@@ -26,10 +26,10 @@ export const interests: Interest[] = [
   },
   {
     id: "fitness",
-    name: "Gyms & fitness",
+    name: "Gyms, fitness & run clubs",
     short: "Fitness",
-    blurb: "Gyms, studios and training clubs, with their latest posted membership prices.",
-    covers: ["Membership prices", "Day passes", "Locations"],
+    blurb: "Gyms, studios, run clubs and training groups, with their latest posted prices.",
+    covers: ["Membership prices", "Run clubs", "Locations"],
     hex: "#c17f4a",
     tile: "bg-clay text-white",
     badge: "bg-clay-50 text-clay-700",
@@ -63,6 +63,16 @@ export const interests: Interest[] = [
     hex: "#2f6f7a",
     tile: "bg-lagoon text-white",
     badge: "bg-lagoon-50 text-lagoon",
+  },
+  {
+    id: "volunteer",
+    name: "Volunteering & charity",
+    short: "Volunteer",
+    blurb: "Food banks, animal shelters, beach cleanups and other ways to give time on Oʻahu.",
+    covers: ["What volunteers do", "Minimum age", "How to sign up"],
+    hex: "#3f6b5a",
+    tile: "bg-[#3f6b5a] text-white",
+    badge: "bg-[#dfe9df] text-forest",
   },
 ];
 

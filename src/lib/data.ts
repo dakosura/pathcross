@@ -1,6 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
 import type { Event } from "@/types";
 import { supabase } from "./supabase";
+import { datesBetween, occurrence, splitOccurrenceId, occursOn, type Series } from "./recurring";
+import { series } from "./weekly-events";
 
 const CHAMBER = "Chamber of Commerce Hawaii";
 
@@ -243,7 +245,31 @@ async function loadUpcoming(): Promise<Event[]> {
   return list.filter((e) => e.date >= today);
 }
 
-export const categories = ["Finance", "Tech", "General Professional", "Startup"] as const;
+export const categories = ["Finance", "Tech", "General Professional", "Startup", "Community", "Fitness", "Volunteer"] as const;
+
+/** How far ahead the calendar lists each repeating event. */
+const CALENDAR_DAYS = 70;
+
+/**
+ * Repeating events (see weekly-events.ts). `next` is each series' coming date
+ * under its stable id, for lists; `all` is every date in the next ten weeks
+ * under date-stamped ids, for the calendar. Cached with the event list.
+ */
+async function loadWeekly(): Promise<{ next: { series: Series; event: Event }[]; all: Event[] }> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("events");
+  const today = todayHST();
+  const next: { series: Series; event: Event }[] = [];
+  const all: Event[] = [];
+  for (const s of series) {
+    // Select dates can fall well beyond the calendar window, so look a year ahead for the next one.
+    const upcoming = datesBetween(s, today, 366);
+    if (upcoming.length) next.push({ series: s, event: occurrence(s, upcoming[0]) });
+    for (const d of datesBetween(s, today, CALENDAR_DAYS)) all.push(occurrence(s, d, true));
+  }
+  return { next, all };
+}
 
 /** Today's date in Honolulu, e.g. "2026-11-15". Cached with the event list. */
 export async function getToday(): Promise<string> {
@@ -253,8 +279,23 @@ export async function getToday(): Promise<string> {
   return todayHST();
 }
 
+const byTime = (a: Event, b: Event) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time);
+
+/** One-off events plus the next date of each repeating event. */
 export async function getEvents(): Promise<Event[]> {
-  return [...(await loadUpcoming())].sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+  const [oneOff, weekly] = await Promise.all([loadUpcoming(), loadWeekly()]);
+  return [...oneOff, ...weekly.next.map((n) => n.event)].sort(byTime);
+}
+
+/** One-off events plus every date of every repeating event for the next ten weeks. */
+export async function getCalendarEvents(): Promise<Event[]> {
+  const [oneOff, weekly] = await Promise.all([loadUpcoming(), loadWeekly()]);
+  return [...oneOff, ...weekly.all].sort(byTime);
+}
+
+/** Every repeating event with its next date, soonest first. */
+export async function getWeeklySeries(): Promise<{ series: Series; event: Event }[]> {
+  return [...(await loadWeekly()).next].sort((a, b) => byTime(a.event, b.event));
 }
 
 export async function getFeaturedEvents(): Promise<Event[]> {
@@ -262,5 +303,11 @@ export async function getFeaturedEvents(): Promise<Event[]> {
 }
 
 export async function getEvent(id: string): Promise<Event | undefined> {
-  return (await loadUpcoming()).find((ev) => ev.id === id);
+  const found = (await getEvents()).find((ev) => ev.id === id);
+  if (found) return found;
+  // A date-stamped link into a repeating event ("series--2026-11-21"), as the calendar uses.
+  const parts = splitOccurrenceId(id);
+  const s = parts && series.find((x) => x.id === parts.series);
+  if (parts && s && occursOn(s, parts.date) && parts.date >= (await getToday())) return occurrence(s, parts.date, true);
+  return undefined;
 }

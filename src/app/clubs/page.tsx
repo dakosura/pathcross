@@ -17,7 +17,7 @@ export default function ClubsPage() {
   return (
     <>
       <PageHeader eyebrow="Oʻahu · By interest" title="Clubs & Programs">
-        Find the places and groups worth joining, from professional associations to gyms, golf, member clubs and yacht clubs. We show only what each organization publishes, with its latest posted pricing when available.
+        Find the places and groups worth joining, from professional associations to gyms, run clubs, golf, member clubs, yacht clubs and volunteering. We show only what each organization publishes, with its latest posted pricing when available.
       </PageHeader>
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <SectionHeading title="Browse by interest" subtitle="Pick a category to see who's listed." />

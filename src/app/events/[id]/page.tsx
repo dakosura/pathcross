@@ -75,7 +75,7 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
             <div className="min-w-0">
               <CategoryBadge category={ev.category} />
               <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{ev.title}</h1>
-              <p className="mt-2 text-cream/75">Organized by {ev.organizer}</p>
+              <p className="mt-2 text-cream/75">Organized by {ev.organizer}{ev.recurrence ? ` · ${ev.recurrence}` : ""}</p>
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
         </div>
         <aside className="h-fit space-y-5 rounded-2xl border border-line bg-sand p-6 text-sm">
           <dl className="space-y-4">
-            <div><dt className="font-semibold text-ink">When</dt><dd className="text-bark">{formatDate(ev.date, { weekday: "long", year: "numeric" })}<br />{formatRange(ev.start_time, ev.end_time)}</dd></div>
+            <div><dt className="font-semibold text-ink">When</dt><dd className="text-bark">{ev.recurrence && <span className="font-medium text-ink">{ev.recurrence}<br /></span>}{ev.recurrence ? "Next: " : ""}{formatDate(ev.date, { weekday: "long", year: "numeric" })}<br />{formatRange(ev.start_time, ev.end_time)}</dd></div>
             <div><dt className="font-semibold text-ink">Where</dt><dd className="text-bark">{ev.location.venue}{!ev.online && <><br />{ev.address ?? ev.location.city}</>}</dd></div>
             {ev.price && <div><dt className="font-semibold text-ink">Price</dt><dd className="text-bark">{ev.price}</dd></div>}
           </dl>

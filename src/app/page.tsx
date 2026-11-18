@@ -11,11 +11,13 @@ import { formatRange } from "@/lib/format";
 import { interests } from "@/lib/interests";
 
 export default async function Home() {
-  const [all, featured] = await Promise.all([getEvents(), getFeaturedEvents()]);
+  const [everything, featured] = await Promise.all([getEvents(), getFeaturedEvents()]);
+  // Weekly markets and run clubs have their own page; keep them out of the headline lists.
+  const all = everything.filter((e) => !e.recurrence);
   const spotlight = (featured.length >= 3 ? featured : all).slice(0, 3);
   const next = all.slice(0, 5);
   const stats = [
-    { n: all.length, label: "upcoming events" },
+    { n: everything.length, label: "upcoming events" },
     { n: clubs.filter((c) => !c.pending).length, label: "clubs & groups listed" },
     { n: interests.length, label: "interests to explore" },
   ];
@@ -51,10 +53,20 @@ export default async function Home() {
         <EventGrid events={spotlight} />
       </section>
 
-      <section className="bg-sand">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid items-center gap-4 rounded-2xl bg-sand p-6 sm:p-8 md:grid-cols-[1fr_auto]">
+          <div>
+            <h2 className="text-xl font-semibold sm:text-2xl">Something every week</h2>
+            <p className="mt-1 max-w-2xl text-sm text-bark sm:text-base">Farmers markets, run clubs, volunteer shifts and Friday fireworks, listed by day of the week so there is always somewhere to go.</p>
+          </div>
+          <Link href="/weekly" className="rounded-full bg-forest px-6 py-3 text-center font-semibold text-cream transition hover:bg-forest-700">See the weekly lineup</Link>
+        </div>
+      </section>
+
+      <section className="bg-sand mt-16 sm:mt-20">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <SectionHeading title="Explore by interest" subtitle="Clubs, programs and places to belong, beyond the next mixer." href="/clubs" cta="All clubs & programs" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {interests.map((i) => {
               const count = clubsByInterest(i.id).length;
               return (

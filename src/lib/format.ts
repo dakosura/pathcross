@@ -14,5 +14,7 @@ export function formatTime(t: string) {
 }
 
 export function formatRange(start: string, end: string) {
+  // Many organizers post a start time only.
+  if (start === end) return formatTime(start);
   return `${formatTime(start)} – ${formatTime(end)}`;
 }

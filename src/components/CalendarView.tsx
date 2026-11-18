@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Event, EventCategory } from "@/types";
 import { categoryStyle } from "@/lib/categories";
 import { formatDate, formatRange, formatTime } from "@/lib/format";
+import { addDays } from "@/lib/recurring";
+import { DayView } from "./DayView";
 import { SaveButton } from "./SaveButton";
 import { SignupLink } from "./SignupLink";
 
@@ -16,6 +18,17 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
   const [cursor, setCursor] = useState({ y: ty, m: tm - 1 });
   const [selected, setSelected] = useState<string | null>(today);
   const [category, setCategory] = useState<EventCategory | "All">("All");
+  // The day shown full screen, or null when the month view is showing.
+  const [open, setOpen] = useState<string | null>(null);
+
+  const openDay = useCallback((iso: string) => {
+    const [y, m] = iso.split("-").map(Number);
+    setCursor({ y, m: m - 1 });
+    setSelected(iso);
+    setOpen(iso);
+  }, []);
+  const closeDay = useCallback(() => setOpen(null), []);
+  const moveDay = useCallback((delta: number) => { if (open) openDay(addDays(open, delta)); }, [open, openDay]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, Event[]>();
@@ -53,6 +66,7 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
         ))}
       </div>
 
+      <p className="mb-3 text-sm text-bark">Click any day to open it as a full-day view.</p>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="overflow-hidden rounded-2xl border border-line bg-card shadow-[0_1px_3px_rgba(42,36,25,0.06)]" aria-label="Month view">
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
@@ -76,9 +90,10 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
               return (
                 <button
                   key={iso}
-                  onClick={() => setSelected(isSelected ? null : iso)}
+                  onClick={() => openDay(iso)}
                   aria-pressed={isSelected}
-                  aria-label={`${formatDate(iso, { weekday: "long" })}, ${list.length} ${list.length === 1 ? "event" : "events"}`}
+                  aria-haspopup="dialog"
+                  aria-label={`${formatDate(iso, { weekday: "long", month: "long", day: "numeric" })}, ${list.length} ${list.length === 1 ? "event" : "events"}. Open the full day.`}
                   className={`min-h-16 border-b border-r border-line/70 p-1.5 text-left align-top transition sm:min-h-28 sm:p-2 ${isSelected ? "bg-moss-50 ring-2 ring-inset ring-moss/50" : "hover:bg-sand/60"} ${iso < today ? "opacity-55" : ""}`}
                 >
                   <span className={`inline-grid h-7 w-7 place-items-center rounded-full text-sm font-semibold ${isToday ? "bg-clay text-white" : "text-ink"}`}>{day}</span>
@@ -125,6 +140,7 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
           )}
         </section>
       </div>
+      {open && <DayView date={open} events={byDay.get(open) ?? []} today={today} onClose={closeDay} onMove={moveDay} />}
     </div>
   );
 }

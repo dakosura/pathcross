@@ -15,6 +15,7 @@ export function EventCard({ event }: { event: Event }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge category={event.category} />
+            {event.recurrence && <span className="text-xs font-semibold text-bark"><span aria-hidden="true">↻ </span>{event.recurrence}</span>}
             {event.placeholder ? (
               <span className="text-xs font-medium text-bark">Sample listing</span>
             ) : event.featured ? (

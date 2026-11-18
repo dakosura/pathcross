@@ -2,7 +2,10 @@ export type EventCategory =
   | "Finance"
   | "Tech"
   | "General Professional"
-  | "Startup";
+  | "Startup"
+  | "Community"
+  | "Fitness"
+  | "Volunteer";
 
 export interface Event {
   id: string;
@@ -30,6 +33,10 @@ export interface Event {
   note?: string;
   /** Group that hosts it (see src/lib/clubs.ts) */
   club_id?: string;
+  /** Set for repeating events, e.g. "Every Saturday" */
+  recurrence?: string;
+  /** The repeating series this date belongs to (see src/lib/weekly-events.ts) */
+  series_id?: string;
   /** Online-only; no map pin */
   online?: boolean;
   /** True for seed listings that are not real events yet */
@@ -39,7 +46,7 @@ export interface Event {
   lng?: number;
 }
 
-export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating";
+export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating" | "volunteer";
 
 export interface PriceLine {
   /** e.g. "Monthly membership" */
