@@ -3,27 +3,30 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: "How PathCross finds, rates and ranks networking events and clubs in Honolulu, and how the 1 to 5 star networking rating is calculated.",
+  description: "PathCross helps Honolulu professionals spend their evenings in the right rooms. See how we rate and rank networking events and clubs from 1 to 5 stars for meeting people.",
 };
 
 const steps = [
-  { n: "1", title: "Tell us what you do", body: "Pick your profession and what you're after: clients, a wider network, new hobbies, or just friends. It takes two taps and you can skip it." },
-  { n: "2", title: "See what's worth your time", body: "Every event gets a networking rating from 1 to 5 stars, with the reasons behind it and a tip for going in. Your Top 10 re-ranks around you." },
-  { n: "3", title: "Sign up and show up", body: "Each listing links to the organizer's own page to register. Add it to My Network to see it on your map." },
+  { n: "1", title: "Tell us what you do", body: "Pick your profession and what you want from your network: clients, partners, mentors, a new job, or a wider circle. It takes two taps and you can skip it." },
+  { n: "2", title: "See what's worth your time", body: "Every event gets a networking rating from 1 to 5 stars, with the reasons behind it and a tip for making the most of it. Your Top 10 re-ranks around you." },
+  { n: "3", title: "Sign up and show up", body: "Each listing links to the organizer's own page to register. Add it to My Network to plan your week and see it on your map." },
 ];
 
 const different = [
-  { title: "Rated, not just listed", body: "Ticketing sites show you everything. PathCross tells you which events are actually good for meeting people, and why." },
-  { title: "Matched to you", body: "A founder and a financial advisor shouldn't see the same top picks. Your profession and goals shape every rating." },
-  { title: "Clubs as well as events", body: "Gyms, golf, member clubs, yacht and paddling clubs, with how to join and posted prices, because the best networks are built between events." },
+  { title: "Rated, not just listed", body: "Ticketing sites show you everything. PathCross tells you which events are actually good for meeting people, and why, so you stop spending evenings on rooms that go nowhere." },
+  { title: "Matched to you", body: "A founder and a financial advisor shouldn't see the same top picks. Your profession and goals shape every rating, so your time goes to the rooms that matter for your work." },
+  { title: "Clubs as well as events", body: "Gyms, golf, member clubs, yacht and paddling clubs, with how to join and posted prices, because the strongest professional relationships are built between events, not at them." },
 ];
 
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">How PathCross works</h1>
+      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Spend your time in the right rooms</h1>
       <p className="mt-4 max-w-2xl text-lg text-bark">
-        Good connections start with showing up in the right rooms. PathCross is the most efficient way to find the networking events, clubs and groups in Honolulu that fit you, whatever you do for work and whatever you&apos;re looking for outside it.
+        Your next client, collaborator or career move is probably in a room you haven&apos;t found yet. PathCross is the most efficient way for Honolulu professionals to find the networking events, clubs and groups worth showing up to, rated for how likely you are to meet the right people.
+      </p>
+      <p className="mt-3 max-w-2xl text-bark">
+        Your time is limited. Stop scrolling through listings and guessing. See what&apos;s on, know why it&apos;s worth it, and walk in with a plan. It&apos;s free.
       </p>
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {steps.map((s) => (
@@ -58,7 +61,7 @@ export default function AboutPage() {
         <p className="mt-4 text-sm text-bark">Every rating shows its reasons on the event page, so you can judge it for yourself. Ratings are a guide, not a guarantee of who will be in the room.</p>
       </section>
 
-      <Link href="/events" className="mt-12 inline-block rounded-full bg-forest px-6 py-3 font-semibold text-cream hover:bg-forest-700">Browse events</Link>
+      <Link href="/events" className="mt-12 inline-block rounded-full bg-forest px-6 py-3 font-semibold text-cream hover:bg-forest-700">Find your next event</Link>
       <Link href="/clubs" className="ml-3 mt-12 inline-block rounded-full px-6 py-3 font-semibold text-forest ring-1 ring-forest/25 hover:bg-moss-50">Clubs &amp; Programs</Link>
     </div>
   );
