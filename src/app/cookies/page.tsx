@@ -10,7 +10,7 @@ export default function CookiesPage() {
   return (
     <LegalPage title="Cookie policy" current="/cookies" intro="What the site stores in your browser, what's optional, and how to change your mind.">
       <h2>The short version</h2>
-      <p>{site.name} stores a few small items in your browser to keep you signed in and remember your choices. We don&apos;t use advertising cookies. Analytics is optional and stays off unless you accept it.</p>
+      <p>{site.name} stores a few small items in your browser to keep you signed in and remember your choices. We don&apos;t use advertising cookies. Third-party analytics is optional and stays off unless you accept it.</p>
 
       <h2>Essential storage</h2>
       <p>These are needed for the site to work, so they don&apos;t require consent. They are kept in your browser&apos;s local storage rather than as traditional cookies.</p>
@@ -23,8 +23,11 @@ export default function CookiesPage() {
         </tbody>
       </table>
 
+      <h2>Visit counts</h2>
+      <p>We count page views with our own simple counter. It sets no cookies and stores nothing in your browser, and it keeps no IP address: each visit gets a one-way anonymous code that changes every day. It does nothing if your browser sends a Do Not Track or Global Privacy Control signal. The <Link href="/privacy">privacy notice</Link> lists what it records.</p>
+
       <h2>Optional analytics</h2>
-      <p>We don&apos;t run analytics at the moment. If we add it, it will help us understand which pages are useful, and it will load only for people who chose &quot;Accept all&quot;. If you chose &quot;Essential only&quot;, it won&apos;t load for you.</p>
+      <p>We don&apos;t run any third-party analytics at the moment. If we add it, it will help us understand which pages are useful, and it will load only for people who chose &quot;Accept all&quot;. If you chose &quot;Essential only&quot;, it won&apos;t load for you.</p>
 
       <h2>Other services</h2>
       <p>The maps load imagery from Google Maps Platform (home page) and OpenFreeMap. Your browser contacts those services directly, and they may keep their own technical records. See the <Link href="/privacy">privacy notice</Link> for details.</p>

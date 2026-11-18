@@ -19,6 +19,7 @@ export default function PrivacyPage() {
         <li><strong>Your My Network picks</strong>: the events and clubs you add. They are stored with your account so your map is available on any device.</li>
         <li><strong>Your profession and what you&apos;re looking for</strong>, if you choose to tell us. They are optional and used only to rate and rank events for you. They are kept in your browser, and with your account once you create one.</li>
         <li><strong>Sign-in details</strong>: the dates you created your account and last signed in, kept by our sign-in provider.</li>
+        <li><strong>Anonymous visit counts</strong>: when you view a page, we record the page, the site you came from, any campaign tag in the link, your country, your device type and browser, and a one-way anonymous code that changes every day. We don&apos;t store your IP address or any cookie, and the code can&apos;t be traced back to you or linked from one day to the next. We also count clicks on links that leave {site.name}, such as a Sign up button. This is switched off if your browser sends a Do Not Track or Global Privacy Control signal.</li>
         <li><strong>Technical data</strong>: like most sites, our hosting provider logs requests, including IP address, browser type and the pages requested. We use this to run and protect the site.</li>
       </ul>
       <p>We don&apos;t collect payment details. We don&apos;t ask for your name, phone number or precise location.</p>
@@ -28,16 +29,17 @@ export default function PrivacyPage() {
         <li>To sign you in and keep you signed in.</li>
         <li>To save and show your network.</li>
         <li>To tailor event ratings and your Top 10 to you.</li>
+        <li>To understand which pages and events are useful, so we can improve the site.</li>
         <li>To keep the site working and secure.</li>
       </ul>
-      <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. We don&apos;t currently use analytics. If we add it, it will only run with your consent, as described in the <Link href="/cookies">cookie policy</Link>.</p>
+      <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. Beyond the anonymous visit counts above, we don&apos;t use analytics. If we add a third-party analytics service, it will only run with your consent, as described in the <Link href="/cookies">cookie policy</Link>.</p>
 
       <h2>Who helps us run the site</h2>
       <p>These providers process data for us, or receive requests from your browser when you use the site:</p>
       <table>
         <thead><tr><th>Provider</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>Supabase</td><td>Stores accounts and My Network picks, and sends sign-in emails.</td></tr>
+          <tr><td>Supabase</td><td>Stores accounts, My Network picks and the anonymous visit counts, and sends sign-in emails.</td></tr>
           <tr><td>Vercel</td><td>Hosts the website and keeps request logs.</td></tr>
           <tr><td>Google Maps Platform</td><td>Supplies the 3D map on the home page. Your browser requests map imagery from Google directly.</td></tr>
           <tr><td>OpenFreeMap</td><td>Supplies street-map tiles for the other maps. Your browser requests them directly.</td></tr>

@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuthDialog } from "@/components/AuthDialog";
 import { CookieBanner } from "@/components/CookieConsent";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { site } from "@/lib/site";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Footer />
         <AuthDialog />
         <CookieBanner />
+        <PageViewTracker />
       </body>
     </html>
   );

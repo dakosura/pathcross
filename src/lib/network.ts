@@ -143,13 +143,13 @@ async function clear() {
 }
 
 /** Emails a one-time sign-in link. Creates the account on first use. */
-export async function sendSignInLink(email: string): Promise<string | null> {
+export async function sendSignInLink(email: string, redirectPath = "/my-network"): Promise<string | null> {
   if (!supabase) return "Sign-in isn't set up yet.";
   const p = state.profile;
   const { error } = await supabase.auth.signInWithOtp({
     email,
     // `data` is stored on the account only when this email is new.
-    options: { emailRedirectTo: `${window.location.origin}/my-network`, ...(hasProfile(p) ? { data: { profession: p.profession ?? null, goals: p.goals } } : {}) },
+    options: { emailRedirectTo: `${window.location.origin}${redirectPath}`, ...(hasProfile(p) ? { data: { profession: p.profession ?? null, goals: p.goals } } : {}) },
   });
   if (!error) return null;
   return error.status === 429 ? "Too many sign-in emails were requested. Please wait a few minutes and try again." : "We couldn't send the email. Check the address and try again.";
