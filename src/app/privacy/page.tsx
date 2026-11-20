@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       <h2>What we collect</h2>
       <p>You can browse events, the calendar and Clubs &amp; Programs without giving us anything. We collect information only in these cases:</p>
       <ul>
-        <li><strong>Your email address</strong>, when you create a login for My Network. We use it to send you sign-in links.</li>
+        <li><strong>Your email address</strong>, when you create a login for My Network. We use it to send you sign-in links, and we may email you about your account or PathCross. Our site owner can see the list of account emails.</li>
         <li><strong>Your My Network picks</strong>: the events and clubs you add. They are stored with your account so your map is available on any device.</li>
         <li><strong>Your profession and what you&apos;re looking for</strong>, if you choose to tell us. They are optional and used only to rate and rank events for you. They are kept in your browser, and with your account once you create one.</li>
         <li><strong>Sign-in details</strong>: the dates you created your account and last signed in, kept by our sign-in provider.</li>

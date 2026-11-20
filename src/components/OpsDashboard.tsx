@@ -18,7 +18,7 @@ export interface Stats {
     saved_total: number;
     saved_top: { kind: string; id: string; label: string; saves: number }[];
   };
-  accounts: { total: number; last7: number; last30: number; daily: { day: string; count: number }[]; professions: Named[]; goals: Named[] };
+  accounts: { total: number; last7: number; last30: number; daily: { day: string; count: number }[]; professions: Named[]; goals: Named[]; recent: { email: string; created_at: string }[] };
 }
 type Problem = null | { kind: "signed-out" | "not-admin" | "not-configured" | "server"; email?: string; message?: string };
 
@@ -107,8 +107,37 @@ function DailyChart({ daily, days, asOf }: { daily: { day: string; views: number
 
 function SignIn() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [usePassword, setUsePassword] = useState(true);
   const [phase, setPhase] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
+
+  if (usePassword) {
+    return (
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setError(null);
+          setPhase("sending");
+          // On success the page picks up the new session by itself.
+          const { error: err } = (await supabase?.auth.signInWithPassword({ email: email.trim(), password })) ?? { error: { message: "not-set-up", status: 0 } };
+          if (err) {
+            setError(err.status === 429 ? "Too many attempts. Please wait a few minutes and try again." : "That email and password didn't work. If you haven't set a password yet, use the email link below.");
+            setPhase("idle");
+          }
+        }}
+        className="space-y-3"
+      >
+        <label htmlFor="ops-email" className="block text-sm font-semibold text-ink">Email</label>
+        <input id="ops-email" type="email" required autoFocus autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none focus:border-moss" />
+        <label htmlFor="ops-password" className="block text-sm font-semibold text-ink">Password</label>
+        <input id="ops-password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none focus:border-moss" />
+        {error && <p role="alert" className="text-sm font-medium text-clay-700">{error}</p>}
+        <button type="submit" disabled={phase === "sending"} className="w-full rounded-full bg-forest px-4 py-3 text-sm font-semibold text-cream hover:bg-forest-700 disabled:opacity-60">{phase === "sending" ? "Signing in…" : "Sign in"}</button>
+        <button type="button" onClick={() => { setUsePassword(false); setError(null); }} className="w-full text-center text-sm font-semibold text-clay-700 hover:underline">Email me a sign-in link instead</button>
+      </form>
+    );
+  }
   if (phase === "sent") return <p role="status" className="rounded-xl bg-moss-50 p-4 text-sm text-forest">Check your email for a sign-in link, and open it on this device. You&apos;ll land back here.</p>;
   return (
     <form
@@ -119,6 +148,7 @@ function SignIn() {
       <input id="ops-email" type="email" required autoFocus autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm outline-none focus:border-moss" />
       {error && <p role="alert" className="text-sm font-medium text-clay-700">{error}</p>}
       <button type="submit" disabled={phase === "sending"} className="w-full rounded-full bg-forest px-4 py-3 text-sm font-semibold text-cream hover:bg-forest-700 disabled:opacity-60">{phase === "sending" ? "Sending…" : "Email me a sign-in link"}</button>
+      <button type="button" onClick={() => { setUsePassword(true); setError(null); setPhase("idle"); }} className="w-full text-center text-sm font-semibold text-clay-700 hover:underline">Use a password instead</button>
     </form>
   );
 }
@@ -169,13 +199,28 @@ export function Report({ stats }: { stats: Stats }) {
             <Panel title="Most saved to My Network">
               <BarList rows={(t?.saved_top ?? []).map((s) => ({ label: s.label, value: s.saves, sub: s.kind === "clubs" ? "club" : "event" }))} empty="Nothing saved yet." />
             </Panel>
-            <Panel title="Who has signed up" hint="Counts only. Individual accounts are never listed.">
+            <Panel title="Who has signed up" hint="Professions and goals are counts only. The email list is in the next panel.">
               <p className="mb-2 text-sm font-semibold text-ink">Profession</p>
               <BarList rows={(a?.professions ?? []).map((p) => ({ label: p.name, value: p.visitors }))} empty="No one has chosen a profession yet." />
               <p className="mb-2 mt-5 text-sm font-semibold text-ink">Looking for</p>
               <BarList rows={(a?.goals ?? []).map((g) => ({ label: g.name, value: g.visitors }))} empty="No one has chosen goals yet." />
             </Panel>
           </div>
+
+          <Panel title="Recent sign-ups" hint={`Free accounts, newest first. Showing ${a?.recent?.length ?? 0} of ${fmt(a?.total ?? 0)}. Private: only you can see this.`}>
+            {(a?.recent?.length ?? 0) === 0 ? (
+              <p className="text-sm text-bark">No sign-ups yet.</p>
+            ) : (
+              <ul className="divide-y divide-line text-sm">
+                {a.recent.map((r) => (
+                  <li key={r.email} className="flex items-baseline justify-between gap-3 py-2">
+                    <a href={`mailto:${r.email}`} className="min-w-0 truncate text-ink hover:underline">{r.email}</a>
+                    <span className="shrink-0 text-xs text-bark">{new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "Pacific/Honolulu" })}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
 
           <p className="text-xs text-bark">Counting began when this feature was published, so older visits aren&apos;t included. Visits from search-engine and monitoring bots, and from people who send a Do Not Track signal, are left out, so your own numbers may read a little higher than Google&apos;s.</p>
         </div>

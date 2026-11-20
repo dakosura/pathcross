@@ -22,6 +22,8 @@ export interface OpsStats {
     daily: { day: string; count: number }[];
     professions: Row[];
     goals: Row[];
+    /** Newest sign-ups, for the site owner only. */
+    recent: { email: string; created_at: string }[];
   };
 }
 
@@ -61,12 +63,12 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
     }
   }
 
-  // Accounts: counted from the sign-in system. Individuals are never listed.
-  const users: { created_at: string; user_metadata: Record<string, unknown> | null }[] = [];
+  // Accounts: counted from the sign-in system. Emails are shown only to the admin, on /ops.
+  const users: { email: string; created_at: string; user_metadata: Record<string, unknown> | null }[] = [];
   for (let page = 1; page <= 5; page++) {
     const { data: list, error: listError } = await db.auth.admin.listUsers({ page, perPage: 1000 });
     if (listError || !list) break;
-    users.push(...list.users.map((u) => ({ created_at: u.created_at, user_metadata: (u.user_metadata ?? null) as Record<string, unknown> | null })));
+    users.push(...list.users.map((u) => ({ email: u.email ?? "", created_at: u.created_at, user_metadata: (u.user_metadata ?? null) as Record<string, unknown> | null })));
     if (list.users.length < 1000) break;
   }
   const now = Date.now();
@@ -87,6 +89,11 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
       daily: [...perDay.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([day, c]) => ({ day, count: c })),
       professions: count(users.map((u) => (typeof u.user_metadata?.profession === "string" ? professionLabel(u.user_metadata.profession) : undefined))),
       goals: count(goalIds.map((g) => goalLabel(g))),
+      recent: users
+        .filter((u) => u.email)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, 200)
+        .map((u) => ({ email: u.email, created_at: u.created_at })),
     },
   };
 }
