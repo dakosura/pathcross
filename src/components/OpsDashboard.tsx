@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { isIgnored, setIgnored } from "@/lib/ignore-me";
 import { sendSignInLink } from "@/lib/network";
 import { supabase } from "@/lib/supabase";
 
@@ -232,6 +233,7 @@ export function OpsDashboard() {
   const [token, setToken] = useState<string | null | undefined>(undefined); // undefined = still checking
   const [email, setEmail] = useState<string | null>(null);
   const [days, setDays] = useState(30);
+  const [ignoreMe, setIgnoreMe] = useState(isIgnored); // only shown after sign-in, so it never renders on the server
   const [stats, setStats] = useState<Stats | null>(null);
   const [problem, setProblem] = useState<Problem>(null);
   const [loading, setLoading] = useState(false);
@@ -312,6 +314,10 @@ export function OpsDashboard() {
               <button key={d} onClick={() => setDays(d)} aria-pressed={days === d} className={`rounded-full px-3.5 py-1.5 transition ${days === d ? "bg-card text-forest shadow-sm" : "text-bark hover:text-ink"}`}>{d} days</button>
             ))}
           </div>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-bark" title="Stops this browser's visits from being counted. Turned on automatically when an admin signs in.">
+            <input type="checkbox" checked={ignoreMe} onChange={(e) => { setIgnored(e.target.checked); setIgnoreMe(e.target.checked); }} className="h-4 w-4 accent-[#c17f4a]" />
+            Don&apos;t count my visits here
+          </label>
           <button onClick={() => void supabase?.auth.signOut()} className="text-sm font-semibold text-clay-700 hover:underline">Sign out{email ? ` (${email})` : ""}</button>
         </div>
       </div>
