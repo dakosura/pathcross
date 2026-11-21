@@ -6,14 +6,24 @@ import { ProfileSteps } from "./ProfileSteps";
 
 /** Shared hero UI (headline panel + arrival card) layered over any map. */
 export function HeroOverlay({
-  target, arrived, ready, explore = false, cycleMs = 10_000, onReplay, children,
-}: { target: Event; arrived: boolean; ready: boolean; explore?: boolean; cycleMs?: number; onReplay: () => void; children: ReactNode }) {
+  target, arrived, ready, explore = false, cycleMs = 10_000, onReplay, replayClassName = "left-3", children,
+}: { target: Event; arrived: boolean; ready: boolean; explore?: boolean; cycleMs?: number; onReplay: () => void; /** Horizontal position of Replay in the map's bottom-left corner. */ replayClassName?: string; children: ReactNode }) {
   // Phones: headline panel, then the map, then the event card, stacked so the pins stay clear of the panel.
   // From `lg` (1024px) up: the map fills the section and the panel and card float over it.
   // Anything narrower keeps the stack, so the headline panel never covers the map.
   return (
-    <section className="relative flex flex-col bg-sand lg:block lg:h-[740px] lg:overflow-hidden">
-      <div className="relative order-2 h-[420px] sm:h-[500px] lg:absolute lg:inset-0 lg:h-auto">{children}</div>
+    <section className="relative flex flex-col bg-sand lg:block lg:h-[800px] lg:overflow-hidden">
+      <div className="relative order-2 h-[420px] sm:h-[500px] lg:absolute lg:inset-0 lg:h-auto">
+        {children}
+        {/* Tucked into the bottom-left corner of the map, out of the way of the panel and the event card. */}
+        <button
+          onClick={onReplay}
+          disabled={!ready}
+          className={`absolute bottom-3 z-10 rounded-lg bg-card/90 px-3 py-1.5 text-xs font-medium text-forest shadow-md hover:bg-card disabled:opacity-50 ${replayClassName}`}
+        >
+          ↻ Replay
+        </button>
+      </div>
 
       <div className="order-1 px-4 py-6 sm:px-6 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:top-0 lg:mx-auto lg:max-w-6xl lg:py-10">
         <div className="pointer-events-auto mx-auto max-w-2xl rounded-xl bg-forest/95 p-5 text-cream shadow-xl backdrop-blur sm:p-8 lg:mx-0 lg:max-w-xl">
@@ -30,14 +40,7 @@ export function HeroOverlay({
       </div>
 
       <div className="order-3 mx-auto w-full max-w-2xl px-4 pb-8 pt-4 sm:px-6 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:bottom-0 lg:max-w-6xl lg:pb-10 lg:pt-0">
-        <div className="flex items-end justify-between gap-4 lg:justify-end lg:pb-5">
-          <button
-            onClick={onReplay}
-            disabled={!ready}
-            className="pointer-events-auto rounded-lg bg-card/95 px-3 py-2 text-sm font-medium text-forest shadow-md hover:bg-card disabled:opacity-50"
-          >
-            ↻ Replay
-          </button>
+        <div className="flex items-end justify-end gap-4 lg:pb-5">
           <div
             className={`pointer-events-auto relative w-full overflow-hidden rounded-xl bg-card shadow-xl ring-1 ring-line transition duration-700 ${explore ? "max-w-md px-4 py-2.5" : "max-w-sm p-5"} ${
               arrived ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
