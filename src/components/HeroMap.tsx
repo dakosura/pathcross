@@ -57,7 +57,7 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
     setExplore(false);
     setSelected(target);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const wide = window.matchMedia("(min-width: 640px)").matches; // the same breakpoint the layout switches at
+    const wide = window.matchMedia("(min-width: 1024px)").matches; // the same breakpoint the layout switches at
     // keep the pin clear of the headline panel
     const padding = wide ? { left: 480, top: 0, right: 0, bottom: 0 } : { left: 0, top: 0, right: 0, bottom: 0 };
     const end = { center: [target.lng!, target.lat!] as [number, number], zoom: 16.2, pitch: 55, bearing: -25, padding };
