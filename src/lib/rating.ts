@@ -39,31 +39,31 @@ const FORMATS: { format: Format; test: RegExp; base: number; label: string; tip:
 ];
 
 const AFFINITY: Record<ProfessionId, Record<EventCategory, number>> = {
-  "financial-advisor": { Finance: 1, "General Professional": 0.85, Startup: 0.55, Tech: 0.3, Community: 0.35, Fitness: 0.35, Volunteer: 0.5 },
-  founder: { Startup: 1, Tech: 0.8, "General Professional": 0.65, Finance: 0.55, Community: 0.35, Fitness: 0.4, Volunteer: 0.4 },
-  "business-owner": { "General Professional": 1, Startup: 0.65, Finance: 0.6, Tech: 0.4, Community: 0.45, Fitness: 0.35, Volunteer: 0.5 },
-  "real-estate": { "General Professional": 1, Finance: 0.8, Startup: 0.5, Tech: 0.3, Community: 0.5, Fitness: 0.35, Volunteer: 0.5 },
-  tech: { Tech: 1, Startup: 0.8, "General Professional": 0.45, Finance: 0.25, Community: 0.35, Fitness: 0.45, Volunteer: 0.35 },
-  sales: { "General Professional": 1, Startup: 0.7, Finance: 0.6, Tech: 0.6, Community: 0.45, Fitness: 0.4, Volunteer: 0.45 },
-  legal: { "General Professional": 0.9, Finance: 0.8, Startup: 0.6, Tech: 0.3, Community: 0.35, Fitness: 0.3, Volunteer: 0.5 },
-  healthcare: { "General Professional": 0.85, Finance: 0.5, Startup: 0.45, Tech: 0.4, Community: 0.4, Fitness: 0.45, Volunteer: 0.55 },
-  creative: { "General Professional": 0.8, Startup: 0.7, Tech: 0.6, Finance: 0.3, Community: 0.5, Fitness: 0.4, Volunteer: 0.45 },
-  student: { "General Professional": 0.85, Tech: 0.7, Startup: 0.7, Finance: 0.65, Community: 0.5, Fitness: 0.5, Volunteer: 0.6 },
-  other: { "General Professional": 0.8, Finance: 0.6, Startup: 0.6, Tech: 0.6, Community: 0.5, Fitness: 0.5, Volunteer: 0.5 },
-  social: { "General Professional": 0.7, Startup: 0.5, Tech: 0.5, Finance: 0.4, Community: 0.9, Fitness: 0.9, Volunteer: 0.8 },
+  "financial-advisor": { Finance: 1, "General Professional": 0.85, Startup: 0.55, Tech: 0.3, Community: 0.35, Fitness: 0.35, Volunteer: 0.5, "Real Estate": 0.6, "Food & Drink": 0.4, Sports: 0.35 },
+  founder: { Startup: 1, Tech: 0.8, "General Professional": 0.65, Finance: 0.55, Community: 0.35, Fitness: 0.4, Volunteer: 0.4, "Real Estate": 0.45, "Food & Drink": 0.4, Sports: 0.4 },
+  "business-owner": { "General Professional": 1, Startup: 0.65, Finance: 0.6, Tech: 0.4, Community: 0.45, Fitness: 0.35, Volunteer: 0.5, "Real Estate": 0.6, "Food & Drink": 0.45, Sports: 0.4 },
+  "real-estate": { "General Professional": 1, Finance: 0.8, Startup: 0.5, Tech: 0.3, Community: 0.5, Fitness: 0.35, Volunteer: 0.5, "Real Estate": 1, "Food & Drink": 0.45, Sports: 0.4 },
+  tech: { Tech: 1, Startup: 0.8, "General Professional": 0.45, Finance: 0.25, Community: 0.35, Fitness: 0.45, Volunteer: 0.35, "Real Estate": 0.25, "Food & Drink": 0.35, Sports: 0.45 },
+  sales: { "General Professional": 1, Startup: 0.7, Finance: 0.6, Tech: 0.6, Community: 0.45, Fitness: 0.4, Volunteer: 0.45, "Real Estate": 0.6, "Food & Drink": 0.5, Sports: 0.45 },
+  legal: { "General Professional": 0.9, Finance: 0.8, Startup: 0.6, Tech: 0.3, Community: 0.35, Fitness: 0.3, Volunteer: 0.5, "Real Estate": 0.65, "Food & Drink": 0.4, Sports: 0.35 },
+  healthcare: { "General Professional": 0.85, Finance: 0.5, Startup: 0.45, Tech: 0.4, Community: 0.4, Fitness: 0.45, Volunteer: 0.55, "Real Estate": 0.3, "Food & Drink": 0.4, Sports: 0.5 },
+  creative: { "General Professional": 0.8, Startup: 0.7, Tech: 0.6, Finance: 0.3, Community: 0.5, Fitness: 0.4, Volunteer: 0.45, "Real Estate": 0.3, "Food & Drink": 0.55, Sports: 0.4 },
+  student: { "General Professional": 0.85, Tech: 0.7, Startup: 0.7, Finance: 0.65, Community: 0.5, Fitness: 0.5, Volunteer: 0.6, "Real Estate": 0.3, "Food & Drink": 0.5, Sports: 0.55 },
+  other: { "General Professional": 0.8, Finance: 0.6, Startup: 0.6, Tech: 0.6, Community: 0.5, Fitness: 0.5, Volunteer: 0.5, "Real Estate": 0.4, "Food & Drink": 0.5, Sports: 0.5 },
+  social: { "General Professional": 0.7, Startup: 0.5, Tech: 0.5, Finance: 0.4, Community: 0.9, Fitness: 0.9, Volunteer: 0.8, "Real Estate": 0.3, "Food & Drink": 0.9, Sports: 0.9 },
 };
 
 /** A goal adds to the score when the event matches its formats, categories or words. */
 const GOAL_RULES: Record<GoalId, { formats?: Format[]; categories?: EventCategory[]; words?: RegExp }> = {
   network: { formats: ["mixer", "conference", "meal"] },
-  clients: { formats: ["mixer", "meal"], categories: ["General Professional", "Finance"] },
+  clients: { formats: ["mixer", "meal"], categories: ["General Professional", "Finance", "Real Estate"] },
   hnw: { words: /\bgala\b|annual (membership )?luncheon|\bexecutives?\b|\bexec\b|country club|yacht club|capital grille|\binvestors?\b|\bwealth\b|estate planning/ },
   founders: { categories: ["Startup"], words: /\bfounders?\b|\binvestors?\b|\bpitch\b|fundrais|\bstartups?\b|start-up|entrepreneur/ },
   career: { words: /\bcareers?\b|\bhiring\b|\bjobs?\b|professional development|exec connect|\bmentor/ },
   learn: { formats: ["learn", "conference"] },
-  hobbies: { categories: ["Community", "Fitness"], words: /\bclass\b|\btour\b|field trip|\bgolf\b|paddl|\bhike\b|\bart\b|\bwine\b|tasting/ },
+  hobbies: { categories: ["Community", "Fitness", "Sports", "Food & Drink"], words: /\bclass\b|\btour\b|field trip|\bgolf\b|paddl|\bhike\b|\bart\b|\bwine\b|tasting/ },
   friends: { formats: ["mixer", "meetup", "run", "volunteer"], words: /party|pau hana|happy hour|social/ },
-  active: { categories: ["Fitness"], words: /\brun\b|\bwalk\b|\bgolf\b|paddl|fitness|\byoga\b|\bhike\b|tournament/ },
+  active: { categories: ["Fitness", "Sports"], words: /\brun\b|\bwalk\b|\bgolf\b|paddl|fitness|\byoga\b|\bhike\b|tournament/ },
   service: { categories: ["Volunteer"], words: /volunteer|nonprofit|non-profit|\brotary\b|\blions\b|community impact|civic|united way|charity|collection drive/ },
 };
 

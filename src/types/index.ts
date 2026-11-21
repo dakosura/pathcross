@@ -5,7 +5,10 @@ export type EventCategory =
   | "Startup"
   | "Community"
   | "Fitness"
-  | "Volunteer";
+  | "Volunteer"
+  | "Sports"
+  | "Real Estate"
+  | "Food & Drink";
 
 export interface Event {
   id: string;
@@ -46,7 +49,7 @@ export interface Event {
   lng?: number;
 }
 
-export type InterestId = "professional" | "fitness" | "golf" | "social" | "boating" | "volunteer";
+export type InterestId = "professional" | "realestate" | "food" | "sports" | "fitness" | "golf" | "social" | "boating" | "volunteer";
 
 export interface PriceLine {
   /** e.g. "Monthly membership" */
