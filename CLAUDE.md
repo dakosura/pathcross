@@ -25,7 +25,7 @@ The owner is a non-technical founder, often editing from a phone. Explain change
 - Never commit `.env*` files or paste keys into code. `.env.example` lists the variable names only.
 - Real keys exist only on the owner's Mac and in Vercel. Cloud sessions usually have none, so Supabase-backed features (sign-in, saved events, imports, `/ops`) cannot be run or tested there. Say so instead of guessing.
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only; never prefix it with `NEXT_PUBLIC_`.
-- Schema changes go in `supabase/*.sql`. They are run by hand in the Supabase SQL editor, so flag any new SQL clearly to the owner.
+- Schema changes are migrations: add a new file `supabase/migrations/<YYYYMMDDHHMMSS>_<name>.sql` (idempotent SQL, never edit an applied one). On the owner's Mac the Supabase CLI is logged in and the project is linked, so apply with `supabase db push --remote` (preview first with `--dry-run`; real pushes need `SUPABASE_YES=1`). Read-only checks: `supabase db query --remote --read-only "<sql>"`. Always ask the owner before pushing to production and say what the SQL does. Cloud sessions have no CLI login: describe the migration in the PR and have the owner (or a Mac session) push it.
 - Event `category` and `featured` are curated by hand in Supabase; imports must not overwrite them.
 
 ## Privacy

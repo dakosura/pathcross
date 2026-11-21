@@ -19,7 +19,7 @@
 
 ## 4. Supabase (database + event import)
 1. supabase.com → new project (region: West US / North California).
-2. SQL Editor → New query → paste `supabase/schema.sql` → Run. Expect "Success. No rows returned".
+2. Apply the database setup: run `supabase db push --remote` from this folder (after `supabase login` and `supabase link --project-ref <ref>`), or, without the CLI, paste each file in `supabase/migrations/` in date order into SQL Editor → New query → Run. Expect "Success. No rows returned".
 3. Project Settings → API Keys: copy the Project URL (base address only, no `/rest/v1/`), the anon/publishable key and the service_role/secret key.
 4. Put them in a local `.env.local`, and in Vercel → Settings → Environment Variables (all environments):
    - `NEXT_PUBLIC_SUPABASE_URL`
