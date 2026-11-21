@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { SectionHeading } from "@/components/SectionHeading";
-import { EventGrid } from "@/components/EventGrid";
+import { PersonalFeatured } from "@/components/PersonalFeatured";
+import { ThisWeek } from "@/components/ThisWeek";
 import { DateBlock } from "@/components/DateBlock";
 import { InterestIcon } from "@/components/InterestIcon";
 import { SignupLink } from "@/components/SignupLink";
 import { clubs, clubsByInterest } from "@/lib/clubs";
-import { getEvents, getFeaturedEvents } from "@/lib/data";
+import { getCalendarEvents, getEvents, getFeaturedEvents, getToday } from "@/lib/data";
+import { addDays } from "@/lib/recurring";
 import { formatRange } from "@/lib/format";
 import { interests } from "@/lib/interests";
 
 export default async function Home() {
-  const [everything, featured] = await Promise.all([getEvents(), getFeaturedEvents()]);
+  const [everything, featured, calendar, today] = await Promise.all([getEvents(), getFeaturedEvents(), getCalendarEvents(), getToday()]);
+  const weekEvents = calendar.filter((e) => e.date <= addDays(today, 14));
   // Weekly markets and run clubs have their own page; keep them out of the headline lists.
   const all = everything.filter((e) => !e.recurrence);
   const spotlight = (featured.length >= 3 ? featured : all).slice(0, 3);
@@ -48,9 +51,13 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 sm:pt-20">
+        <SectionHeading title="This week for you" subtitle="The few events most worth your time this week, plus one weekly routine." href="/this-week" cta="Your full week" />
+        <ThisWeek events={weekEvents} today={today} picks={3} />
+      </section>
+
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-        <SectionHeading title="Featured events" subtitle="Hand-picked gatherings happening soon in Honolulu." href="/events" />
-        <EventGrid events={spotlight} />
+        <PersonalFeatured pool={all.slice(0, 40)} fallback={spotlight} />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 sm:px-6">

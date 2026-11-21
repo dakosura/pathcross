@@ -2,8 +2,14 @@
 import Link from "next/link";
 import type { Event } from "@/types";
 import { useNetwork } from "@/lib/network";
-import { rateEvent } from "@/lib/rating";
+import { rateEvent, type Rating } from "@/lib/rating";
 import { Stars } from "./Stars";
+
+/** "Your match" pill: shown only when the visitor has told us about themselves and the event scores 4 stars or more for them. */
+export function MatchBadge({ rating }: { rating: Rating }) {
+  if (!rating.personalized || rating.stars < 4) return null;
+  return <span className="inline-flex items-center rounded-full bg-clay px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Your match</span>;
+}
 
 /** Compact star row for cards. Personalizes itself once a profile is known. */
 export function EventRating({ event }: { event: Event }) {
@@ -14,6 +20,7 @@ export function EventRating({ event }: { event: Event }) {
       <Stars value={r.stars} />
       <span className="sr-only">{r.stars} out of 5 stars.</span>
       <span className="truncate text-bark">{r.summary}</span>
+      <MatchBadge rating={r} />
     </p>
   );
 }
@@ -29,6 +36,7 @@ export function EventInsights({ event }: { event: Event }) {
         <p className="flex items-center gap-2">
           <Stars value={r.stars} className="text-xl" />
           <span className="text-sm font-semibold text-ink">{r.stars} of 5</span>
+          <MatchBadge rating={r} />
         </p>
       </div>
       <p className="mt-1 text-sm font-medium text-clay-700">{r.summary}{r.personalized ? "" : " in general"}</p>

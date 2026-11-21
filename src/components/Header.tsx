@@ -9,6 +9,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/calendar", label: "Calendar" },
   { href: "/clubs", label: "Clubs & Programs" },
+  { href: "/this-week", label: "This week" },
   { href: "/top-10", label: "For you" },
   { href: "/about", label: "How it works" },
 ];

@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToCalendar } from "@/components/AddToCalendar";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { DateBlock } from "@/components/DateBlock";
+import { GoingButton } from "@/components/GoingButton";
 import { EventInsights } from "@/components/EventRating";
 import { SaveButton } from "@/components/SaveButton";
 import { SignupLink } from "@/components/SignupLink";
@@ -103,7 +105,9 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
           </dl>
           <div className="space-y-2.5">
             <SignupLink event={ev} variant="button" />
+            <GoingButton id={ev.id} size="lg" />
             <SaveButton kind="events" id={ev.id} size="lg" />
+            {!ev.placeholder && <AddToCalendar event={ev} size="lg" />}
           </div>
           {!ev.placeholder && <p className="text-xs text-bark/80">Sign-up happens on the organizer&apos;s site. PathCross doesn&apos;t sell tickets.</p>}
         </aside>
