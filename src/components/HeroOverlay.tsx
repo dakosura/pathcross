@@ -6,12 +6,15 @@ import { ProfileSteps } from "./ProfileSteps";
 
 /** Shared hero UI (headline panel + arrival card) layered over any map. */
 export function HeroOverlay({
-  target, arrived, ready, onReplay, children,
-}: { target: Event; arrived: boolean; ready: boolean; onReplay: () => void; children: ReactNode }) {
+  target, arrived, ready, explore = false, onReplay, children,
+}: { target: Event; arrived: boolean; ready: boolean; explore?: boolean; onReplay: () => void; children: ReactNode }) {
+  // Phones: headline panel, then the map, then the event card, stacked so the pins stay clear of the panel.
+  // From `sm` up: the map fills the section and the panel and card float over it.
   return (
-    <section className="relative h-[720px] overflow-hidden bg-sand sm:h-[680px]">
-      <div className="absolute inset-0">{children}</div>
-      <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl flex-col justify-between gap-4 px-4 py-6 sm:px-6 sm:py-10">
+    <section className="relative flex flex-col bg-sand sm:block sm:h-[680px] sm:overflow-hidden">
+      <div className="relative order-2 h-[420px] sm:absolute sm:inset-0 sm:h-auto">{children}</div>
+
+      <div className="order-1 px-4 py-6 sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-0 sm:mx-auto sm:max-w-6xl sm:px-6 sm:py-10">
         <div className="pointer-events-auto max-w-xl rounded-xl bg-forest/95 p-5 text-cream shadow-xl backdrop-blur sm:p-8">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-clay-300">Honolulu · Networking made efficient for business professionals</p>
           <h1 className="text-3xl font-semibold sm:text-5xl">
@@ -23,8 +26,10 @@ export function HeroOverlay({
           <div className="mt-5 sm:mt-6"><ProfileSteps tone="dark" /></div>
           <p className="mt-4 text-sm text-cream/70">Or <Link href="/events" className="font-semibold text-clay-300 hover:text-white">browse every event</Link>.</p>
         </div>
+      </div>
 
-        <div className="flex items-end justify-between gap-4 pb-5 pl-28">
+      <div className="order-3 px-4 pb-8 pt-4 sm:pointer-events-none sm:absolute sm:inset-x-0 sm:bottom-0 sm:mx-auto sm:max-w-6xl sm:px-6 sm:pb-10 sm:pt-0">
+        <div className="flex items-end justify-between gap-4 sm:pb-5 sm:pl-28">
           <button
             onClick={onReplay}
             disabled={!ready}
@@ -47,6 +52,7 @@ export function HeroOverlay({
             <Link href={`/events/${target.id}`} className="mt-4 inline-block rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-cream hover:bg-forest-700">
               View event →
             </Link>
+            {explore && <p className="mt-3 text-xs text-bark/80">Tap any pin on the map to see another event.</p>}
           </div>
         </div>
       </div>
