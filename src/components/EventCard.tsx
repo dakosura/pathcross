@@ -9,7 +9,7 @@ import { SignupLink } from "./SignupLink";
 
 export function EventCard({ event }: { event: Event }) {
   return (
-    <article className="group relative flex flex-col rounded-2xl border border-line bg-card p-5 shadow-[0_1px_3px_rgba(42,36,25,0.06)] transition duration-300 hover:-translate-y-1 hover:border-clay-300 hover:shadow-[0_14px_34px_rgba(42,36,25,0.12)]">
+    <article className="group relative flex min-w-0 flex-col rounded-2xl border border-line bg-card p-5 shadow-[0_1px_3px_rgba(42,36,25,0.06)] transition duration-300 hover:-translate-y-1 hover:border-clay-300 hover:shadow-[0_14px_34px_rgba(42,36,25,0.12)]">
       <div className="flex items-start gap-4">
         <DateBlock iso={event.date} />
         <div className="min-w-0 flex-1">
