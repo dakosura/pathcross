@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Event } from "@/types";
 import { HeroOverlay } from "./HeroOverlay";
+import { useCycle } from "@/lib/use-cycle";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function loadGoogle(key: string): Promise<void> {
@@ -33,6 +34,13 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
   const [ready, setReady] = useState(false);
   const target = events.find((e) => e.id === tourId && e.lat && e.lng)!;
   const [selected, setSelected] = useState<Event>(target);
+  const pinsRef = useRef(new Map<string, any>());
+
+  // The card's event is starred on the map, and the card moves on every ten seconds once the camera has pulled back.
+  useEffect(() => {
+    pinsRef.current.forEach((m, id) => { try { m.label = id === selected.id ? "★" : ""; } catch {} });
+  }, [selected]);
+  useCycle(explore, events, selected, setSelected, 10_000);
 
   const play = useCallback(() => {
     const map = mapRef.current;
@@ -100,6 +108,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
               label: e.id === tourId ? "★" : "",
             });
             m.addEventListener("gmp-click", () => { setSelected(e); setArrived(true); });
+            pinsRef.current.set(e.id, m);
             map.append(m);
           } catch {}
         }
@@ -121,7 +130,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
   }, []);
 
   return (
-    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} onReplay={play}>
+    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} cycleMs={10_000} onReplay={play}>
       <div ref={el} className="h-full w-full" />
     </HeroOverlay>
   );
