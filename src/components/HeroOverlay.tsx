@@ -6,8 +6,8 @@ import { ProfileSteps } from "./ProfileSteps";
 
 /** Shared hero UI (headline panel + arrival card) layered over any map. */
 export function HeroOverlay({
-  target, arrived, ready, explore = false, onReplay, children,
-}: { target: Event; arrived: boolean; ready: boolean; explore?: boolean; onReplay: () => void; children: ReactNode }) {
+  target, arrived, ready, explore = false, cycleMs = 10_000, onReplay, children,
+}: { target: Event; arrived: boolean; ready: boolean; explore?: boolean; cycleMs?: number; onReplay: () => void; children: ReactNode }) {
   // Phones: headline panel, then the map, then the event card, stacked so the pins stay clear of the panel.
   // From `sm` up: the map fills the section and the panel and card float over it.
   return (
@@ -38,21 +38,34 @@ export function HeroOverlay({
             ↻ Replay
           </button>
           <div
-            className={`pointer-events-auto w-full max-w-sm rounded-xl bg-card p-5 shadow-xl ring-1 ring-line transition duration-700 ${
+            className={`pointer-events-auto relative w-full overflow-hidden rounded-xl bg-card shadow-xl ring-1 ring-line transition duration-700 ${explore ? "max-w-md px-4 py-2.5" : "max-w-sm p-5"} ${
               arrived ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-clay-700">Happening in Honolulu</p>
-            <h2 className="mt-1 text-xl font-semibold text-ink">{target.title}</h2>
-            <p className="mt-1 text-sm text-bark">
-              {formatDate(target.date)} · {formatRange(target.start_time, target.end_time)}
-              <br />
-              {target.location.venue}
-            </p>
-            <Link href={`/events/${target.id}`} className="mt-4 inline-block rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-cream hover:bg-forest-700">
-              View event →
-            </Link>
-            {explore && <p className="mt-3 text-xs text-bark/80">Tap any pin on the map to see another event.</p>}
+            {explore ? (
+              // A slim strip once the camera pulls back, so Honolulu stays in view. It changes event every `cycleMs`.
+              <div key={target.id} className="rise flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate text-sm font-semibold text-ink">{target.title}</h2>
+                  <p className="truncate text-xs text-bark">{formatDate(target.date)} · {formatRange(target.start_time, target.end_time)} · {target.location.venue}</p>
+                </div>
+                <Link href={`/events/${target.id}`} className="shrink-0 rounded-lg bg-forest px-3 py-1.5 text-xs font-semibold text-cream hover:bg-forest-700">View →</Link>
+                <span aria-hidden="true" className="cycle-bar absolute inset-x-0 bottom-0 h-0.5 origin-left bg-clay/70" style={{ animation: `cycle ${cycleMs}ms linear forwards` }} />
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-semibold uppercase tracking-wide text-clay-700">Happening in Honolulu</p>
+                <h2 className="mt-1 text-xl font-semibold text-ink">{target.title}</h2>
+                <p className="mt-1 text-sm text-bark">
+                  {formatDate(target.date)} · {formatRange(target.start_time, target.end_time)}
+                  <br />
+                  {target.location.venue}
+                </p>
+                <Link href={`/events/${target.id}`} className="mt-4 inline-block rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-cream hover:bg-forest-700">
+                  View event →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

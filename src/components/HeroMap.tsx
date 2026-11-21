@@ -5,10 +5,13 @@ import type { Map as MLMap, Marker } from "maplibre-gl";
 import type { Event } from "@/types";
 import { HeroOverlay } from "./HeroOverlay";
 import { createMap } from "@/lib/map";
+import { useCycle } from "@/lib/use-cycle";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const PIN_BASE = "block h-6 w-6 rounded-full border-2 border-cream bg-clay shadow-lg transition-transform duration-200 hover:scale-125";
-const PIN_ON = ["scale-125", "ring-4", "ring-clay/40"];
+const PIN_BASE = "block h-4 w-4 rounded-full border-2 border-cream bg-clay shadow-lg transition-transform duration-300 hover:scale-125";
+const PIN_ON = ["scale-[1.8]", "ring-4", "ring-clay/30"];
+const CYCLE_MS = 10_000;
+interface PinParts { pin: HTMLElement; face: HTMLElement; halo: HTMLElement; label: HTMLElement }
 
 /**
  * The homepage map: a flight from Hawaiʻi down to the featured event, then back
@@ -20,7 +23,7 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
   const mapRef = useRef<MLMap | null>(null);
   const libRef = useRef<any>(null);
   const markers = useRef<Marker[]>([]);
-  const pinEls = useRef(new Map<string, HTMLElement>());
+  const pinEls = useRef(new Map<string, PinParts>());
   const timers = useRef<number[]>([]);
   const [arrived, setArrived] = useState(false);
   const [explore, setExplore] = useState(false);
@@ -29,10 +32,21 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
   const target = events.find((e) => e.id === tourId && e.lat && e.lng)!;
   const [selected, setSelected] = useState<Event>(target);
 
-  // The pin whose card is showing gets a ring.
-  useEffect(() => {
-    pinEls.current.forEach((face, id) => PIN_ON.forEach((c) => face.classList.toggle(c, id === selected.id)));
-  }, [selected]);
+  // The pin for the event on the card stands out: bigger, pulsing, and named. The rest stay small dots.
+  const selectedId = useRef(target.id);
+  const highlight = useCallback(() => {
+    pinEls.current.forEach(({ pin, face, halo, label }, id) => {
+      const on = id === selectedId.current;
+      PIN_ON.forEach((c) => face.classList.toggle(c, on));
+      halo.classList.toggle("hidden", !on);
+      label.classList.toggle("hidden", !on);
+      pin.style.zIndex = on ? "2" : "";
+    });
+  }, []);
+  useEffect(() => { selectedId.current = selected.id; highlight(); }, [selected, highlight]);
+
+  // Once the camera has pulled back, move on to the next event every ten seconds.
+  useCycle(explore, events, selected, setSelected, CYCLE_MS);
 
   const play = useCallback(() => {
     const map = mapRef.current;
@@ -51,7 +65,7 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
     // Back out to Honolulu with every pick in view, clear of the headline panel and the event card.
     // The camera is worked out by hand: fitBounds gives up while the map is still tilted and padded.
     const overview = () => {
-      const pad = wide ? { left: 520, top: 60, right: 60, bottom: 240 } : { left: 40, top: 40, right: 40, bottom: 40 };
+      const pad = wide ? { left: 520, top: 90, right: 60, bottom: 110 } : { left: 90, top: 60, right: 90, bottom: 40 };
       const box = el.current!.getBoundingClientRect();
       const availW = Math.max(120, box.width - pad.left - pad.right);
       const availH = Math.max(120, box.height - pad.top - pad.bottom);
@@ -104,18 +118,23 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
           // MapLibre positions the outer element with a transform, so the styled pin sits inside it.
           const pin = document.createElement("button");
           pin.type = "button";
-          pin.ariaLabel = `${e.title}. Show details.`;
           pin.className = "block cursor-pointer";
+          const halo = document.createElement("span");
+          halo.className = "hidden absolute inset-0 animate-ping rounded-full bg-clay/50 motion-reduce:animate-none";
           const face = document.createElement("span");
-          face.className = PIN_BASE;
-          pin.append(face);
-          pinEls.current.set(e.id, face);
+          face.className = `relative ${PIN_BASE}`;
+          const label = document.createElement("span");
+          label.className = "hidden pointer-events-none absolute bottom-full left-1/2 mb-3 max-w-44 -translate-x-1/2 sm:max-w-56 truncate whitespace-nowrap rounded-md bg-forest px-2 py-1 text-xs font-semibold text-cream shadow-lg";
+          label.textContent = e.title; // textContent only: event text comes from outside feeds
+          pin.append(halo, face, label);
+          pinEls.current.set(e.id, { pin, face, halo, label });
           pin.addEventListener("click", () => { setSelected(e); setArrived(true); });
           const marker = new maplibregl.Marker({ element: pin }).setLngLat([e.lng!, e.lat!]).addTo(map);
           // MapLibre labels every marker "Map marker"; name each one after its event instead.
           pin.setAttribute("aria-label", `${e.title}. Show details.`);
           return marker;
         });
+      highlight(); // the markers now exist, so mark the one the card is already showing
       map.on("load", () => {
         if (cancelled) return;
         setReady(true);
@@ -133,7 +152,7 @@ export function HeroMap({ events, tourId }: { events: Event[]; tourId: string })
   }, []);
 
   return (
-    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} onReplay={play}>
+    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} cycleMs={CYCLE_MS} onReplay={play}>
       <div ref={el} className="h-full w-full" />
     </HeroOverlay>
   );
