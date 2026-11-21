@@ -708,6 +708,17 @@ export const clubs: Club[] = [
     facilities: ["Laulima Saturdays", "Plant nurseries", "Site restoration", "Program volunteers"],
   },
   {
+    id: "volunteerally",
+    name: "VolunteerAlly",
+    interest: "volunteer",
+    blurb: "A Honolulu-based 501(c)(3) that connects volunteers with Hawaiʻi nonprofits. Browse one-time dated events and ongoing positions across causes such as food insecurity, the environment, education and Hawaiian culture.",
+    url: "https://www.volunteerally.org/partner-organizations/volunteerally",
+    area: "Honolulu",
+    phone: "(808) 799-7995",
+    membership: "Create a profile on the site to browse and apply for opportunities. Waivers and requirements are set by each partner organization.",
+    facilities: ["Dated events", "Ongoing positions", "Many nonprofits", "Search by cause"],
+  },
+  {
     id: "waikiki-aquarium",
     name: "Waikīkī Aquarium",
     interest: "volunteer",

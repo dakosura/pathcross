@@ -26,6 +26,8 @@ interface Pin {
   lng: number;
   clubId?: string;
   id: string;
+  /** In the visitor's network, as opposed to just available */
+  saved: boolean;
 }
 
 const node = (tag: string, cls: string, text?: string) => {
@@ -86,30 +88,34 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
   const [failed, setFailed] = useState(false);
   const [tab, setTab] = useState<"clubs" | "events">("clubs");
   const [q, setQ] = useState("");
+  // Show every available club and event on the map, not just the visitor's picks.
+  const [seeAll, setSeeAll] = useState(false);
   const { saved, has, toggle, clear, user, status, signOut, error } = useNetwork();
 
-  // Everything the visitor has picked that can be placed on the map
+  // The visitor's picks that can be placed on the map, plus everything else when "See all?" is on
   const pins = useMemo<Pin[]>(() => {
     const out: Pin[] = [];
     for (const c of clubs) {
-      if (!saved.clubs.includes(c.id) || c.lat == null || c.lng == null) continue;
+      const isSaved = saved.clubs.includes(c.id);
+      if ((!isSaved && !seeAll) || c.lat == null || c.lng == null) continue;
       const interest = interestById(c.interest)!;
       out.push({
         key: `club:${c.id}`, id: c.id, kind: "club", title: c.name, detail: `${interest.short} · ${c.area}`,
-        href: `/clubs/${c.interest}/${c.id}`, external: c.url, externalLabel: "Visit site", color: interest.hex, lat: c.lat, lng: c.lng,
+        href: `/clubs/${c.interest}/${c.id}`, external: c.url, externalLabel: "Visit site", color: interest.hex, lat: c.lat, lng: c.lng, saved: isSaved,
       });
     }
     for (const e of events) {
-      if (!saved.events.includes(e.id) || e.lat == null || e.lng == null) continue;
+      const isSaved = saved.events.includes(e.id);
+      if ((!isSaved && !seeAll) || e.lat == null || e.lng == null) continue;
       out.push({
         key: `event:${e.id}`, id: e.id, kind: "event", title: e.title,
         detail: `${formatDate(e.date)} · ${formatTime(e.start_time)} · ${e.location.venue}`,
         href: `/events/${e.id}`, external: signupUrl(e), externalLabel: "Sign up", color: categoryStyle[e.category].hex,
-        lat: e.lat, lng: e.lng, clubId: e.club_id,
+        lat: e.lat, lng: e.lng, clubId: e.club_id, saved: isSaved,
       });
     }
     return out;
-  }, [clubs, events, saved]);
+  }, [clubs, events, saved, seeAll]);
 
   useEffect(() => {
     let cancelled = false;
@@ -156,11 +162,12 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
       groups.set(k, [...(groups.get(k) ?? []), p]);
     }
     for (const group of groups.values()) {
-      const lead = group.find((p) => p.kind === "club") ?? group[0];
+      const lead = group.find((p) => p.saved && p.kind === "club") ?? group.find((p) => p.saved) ?? group.find((p) => p.kind === "club") ?? group[0];
+      const anySaved = group.some((p) => p.saved);
       // MapLibre positions the outer element with a transform, so the animated, styled pin sits inside it
       const pin = node("button", "block cursor-pointer");
       pin.setAttribute("aria-label", group.map((p) => p.title).join(", "));
-      const face = node("span", "pin-drop grid place-items-center border-2 border-cream text-[11px] font-bold text-white shadow-lg " + (lead.kind === "club" ? "h-9 w-9 rounded-xl" : "h-7 w-7 rounded-full"));
+      const face = node("span", "pin-drop grid place-items-center border-2 border-cream text-[11px] font-bold text-white shadow-lg " + (lead.kind === "club" ? "h-9 w-9 rounded-xl" : "h-7 w-7 rounded-full") + (anySaved ? "" : " opacity-60"));
       face.style.background = lead.color;
       face.textContent = group.length > 1 ? String(group.length) : lead.kind === "club" ? lead.title.charAt(0) : "";
       pin.append(face);
@@ -169,9 +176,9 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
     }
 
     const lines = pins
-      .filter((p) => p.kind === "event" && p.clubId)
+      .filter((p) => p.saved && p.kind === "event" && p.clubId)
       .flatMap((ev) => {
-        const club = pins.find((p) => p.kind === "club" && p.id === ev.clubId);
+        const club = pins.find((p) => p.saved && p.kind === "club" && p.id === ev.clubId);
         if (!club || (club.lat === ev.lat && club.lng === ev.lng)) return [];
         return [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[club.lng, club.lat], [ev.lng, ev.lat]] } }];
       });
@@ -191,7 +198,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
   const shownClubs = clubs.filter((c) => !needle || `${c.name} ${c.area} ${c.blurb}`.toLowerCase().includes(needle));
   const shownEvents = events.filter((e) => !needle || `${e.title} ${e.organizer} ${e.location.venue} ${e.category}`.toLowerCase().includes(needle));
   const total = saved.clubs.length + saved.events.length;
-  const unmapped = total - pins.length;
+  const unmapped = total - pins.filter((p) => p.saved).length;
 
   const signedOut = status === "ready" && !user;
 
@@ -270,16 +277,20 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
 
       <div className={`relative order-1 h-[52dvh] min-w-0 bg-sand lg:order-2 lg:block lg:h-auto lg:flex-1 ${signedOut ? "hidden" : ""}`}>
         <div ref={el} className="h-full w-full" />
+        <label className="absolute left-3 top-3 z-10 flex cursor-pointer items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-ink shadow">
+          <input type="checkbox" checked={seeAll} onChange={(e) => setSeeAll(e.target.checked)} className="h-4 w-4 accent-[#c17f4a]" />
+          See all?
+        </label>
         {failed && <p className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-bark">The map couldn&apos;t load. Your picks are still saved in the list.</p>}
         {ready && pins.length === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-4">
             <p className="rise rounded-full bg-forest/95 px-5 py-2.5 text-center text-sm font-medium text-cream shadow-xl">
-              {!user ? "Sign in, then tap a club or event to place it on your map." : total > 0 ? "Your picks are online or don't have a map pin yet." : "Your map is empty. Tap a club or event to place it here."}
+              {seeAll ? "None of the available listings have a map pin yet." : !user ? "Sign in, then tap a club or event to place it on your map. Or tick See all? to browse everything." : total > 0 ? "Your picks are online or don't have a map pin yet." : "Your map is empty. Tap a club or event to place it here."}
             </p>
           </div>
         )}
         {ready && pins.length > 0 && unmapped > 0 && (
-          <p className="absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1.5 text-xs font-medium text-bark shadow">+{unmapped} without a map pin</p>
+          <p className="absolute left-3 top-14 rounded-full bg-card/95 px-3 py-1.5 text-xs font-medium text-bark shadow">+{unmapped} without a map pin</p>
         )}
       </div>
     </div>
