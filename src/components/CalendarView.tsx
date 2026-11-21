@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { Event, EventCategory } from "@/types";
 import { categoryStyle } from "@/lib/categories";
 import { formatDate, formatRange, formatTime } from "@/lib/format";
+import { useHiddenSeries } from "@/lib/hidden-series";
 import { addDays } from "@/lib/recurring";
 import { DayView } from "./DayView";
 import { SaveButton } from "./SaveButton";
@@ -20,6 +21,8 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
   const [category, setCategory] = useState<EventCategory | "All">("All");
   // The day shown full screen, or null when the month view is showing.
   const [open, setOpen] = useState<string | null>(null);
+  // Repeating events this visitor has hidden (kept in their browser only).
+  const { hidden, hide, show, showAll } = useHiddenSeries();
 
   const openDay = useCallback((iso: string) => {
     const [y, m] = iso.split("-").map(Number);
@@ -34,10 +37,18 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
     const map = new Map<string, Event[]>();
     for (const e of events) {
       if (category !== "All" && e.category !== category) continue;
+      if (e.series_id && hidden.includes(e.series_id)) continue;
       map.set(e.date, [...(map.get(e.date) ?? []), e]);
     }
     return map;
-  }, [events, category]);
+  }, [events, category, hidden]);
+
+  // Titles of the hidden repeating events, so each can be brought back.
+  const hiddenList = useMemo(() => {
+    const titles = new Map<string, string>();
+    for (const e of events) if (e.series_id && hidden.includes(e.series_id) && !titles.has(e.series_id)) titles.set(e.series_id, e.title);
+    return [...titles.entries()].map(([id, title]) => ({ id, title }));
+  }, [events, hidden]);
 
   const monthKey = `${cursor.y}-${pad(cursor.m + 1)}`;
   const firstWeekday = new Date(Date.UTC(cursor.y, cursor.m, 1)).getUTCDay();
@@ -65,6 +76,24 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
           </button>
         ))}
       </div>
+
+      {hiddenList.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-line bg-sand/60 p-3 text-sm text-bark" aria-label="Hidden repeating events">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="font-semibold text-ink">Hidden from your calendar ({hiddenList.length})</p>
+            <button type="button" onClick={showAll} className="text-xs font-semibold text-clay-700 hover:underline">Show all again</button>
+          </div>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {hiddenList.map((h) => (
+              <li key={h.id}>
+                <button type="button" onClick={() => show(h.id)} className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-medium text-ink ring-1 ring-line hover:bg-moss-50" aria-label={`Show ${h.title} again`}>
+                  {h.title} <span aria-hidden="true" className="text-clay-700">Show</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <p className="mb-3 text-sm text-bark">Click any day to open it as a full-day view.</p>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -134,13 +163,18 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
                     <SaveButton kind="events" id={e.id} />
                     <SignupLink event={e} />
                   </div>
+                  {e.series_id && (
+                    <button type="button" onClick={() => hide(e.series_id!)} className="mt-3 text-xs font-semibold text-bark underline-offset-2 hover:text-clay-700 hover:underline">
+                      Hide &ldquo;{e.title}&rdquo; from my calendar
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
           )}
         </section>
       </div>
-      {open && <DayView date={open} events={byDay.get(open) ?? []} today={today} onClose={closeDay} onMove={moveDay} />}
+      {open && <DayView date={open} events={byDay.get(open) ?? []} today={today} onClose={closeDay} onMove={moveDay} onHide={hide} />}
     </div>
   );
 }

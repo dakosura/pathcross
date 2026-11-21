@@ -176,6 +176,26 @@ const realEvents: Event[] = [
     lat: 21.27608,
     lng: -157.82575,
   },
+  {
+    id: "brew-house-all-white-dec6",
+    title: "Brew & House Hawaii: All White Edition",
+    category: "Community",
+    date: "2026-12-06",
+    start_time: "11:00",
+    end_time: "14:00",
+    location: { venue: "Hideout at The Laylow", city: "Honolulu" },
+    address: "2299 Kūhiō Ave., 1st Floor, Honolulu, HI 96815",
+    organizer: "Brew & House Hawaii",
+    source_url: "https://avenueticket.com/event/brew-and-house-hawaii-all-white-edition",
+    city: "Honolulu",
+    featured: false,
+    price: "Ticketed through Avenue Ticketing; one listed ticket is $22.69",
+    note: "All-white dress code. Family-friendly; food and drinks are sold on site.",
+    description:
+      "A Sunday-afternoon social in Waikīkī with specialty coffee and matcha, house music and live DJ sets. A relaxed, come-as-you-are way to meet new people and see familiar faces while closing out the year.",
+    lat: 21.27946,
+    lng: -157.82639,
+  },
 ];
 
 /** Hand-verified listings. Also the fallback when the database is unreachable. */
