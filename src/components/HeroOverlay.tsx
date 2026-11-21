@@ -18,7 +18,7 @@ export function HeroOverlay({
             Every good connection starts with <span className="italic text-clay-300">crossing paths.</span>
           </h1>
           <p className="mt-4 hidden text-cream/75 sm:block">
-            The most efficient way to find networking events and groups in Honolulu. Every event is rated for how good it is for meeting people.
+            Your one-stop shop for building a professional network in Honolulu. Find the events, clubs and groups worth your time, all in one place.
           </p>
           <div className="mt-5 sm:mt-6"><PromptBox /></div>
         </div>
