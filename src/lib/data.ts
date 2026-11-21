@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import type { Event } from "@/types";
 import { supabase } from "./supabase";
-import { datesBetween, occurrence, splitOccurrenceId, occursOn, type Series } from "./recurring";
+import { addDays, datesBetween, occurrence, splitOccurrenceId, occursOn, type Series } from "./recurring";
 import { series } from "./weekly-events";
 
 const CHAMBER = "Chamber of Commerce Hawaii";
@@ -289,6 +289,29 @@ async function loadWeekly(): Promise<{ next: { series: Series; event: Event }[];
     for (const d of datesBetween(s, today, CALENDAR_DAYS)) all.push(occurrence(s, d, true));
   }
   return { next, all };
+}
+
+/**
+ * Events from the last few months, for My Network's follow-up ("did you go, who
+ * did you meet, was the rating right?"). The main lists only hold upcoming events.
+ */
+export async function getRecentEvents(days = 90): Promise<Event[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("events");
+  const today = todayHST();
+  const cutoff = addDays(today, -days);
+  const out: Event[] = realEvents.filter((e) => e.date < today && e.date >= cutoff);
+  if (supabase) {
+    const { data, error } = await supabase.from("events").select("*").eq("status", "active").lt("date", today).gte("date", cutoff);
+    if (!error && data) {
+      const curated = new Set(realEvents.flatMap((e) => [e.id, e.source_url]));
+      out.push(...(data as EventRow[]).map(fromRow).filter((e) => !curated.has(e.id) && !curated.has(e.source_url)));
+    }
+  }
+  // Past dates of repeating events, under the same date-stamped ids the calendar uses.
+  for (const s of series) for (const d of datesBetween(s, cutoff, days - 1)) if (d < today) out.push(occurrence(s, d, true));
+  return out.sort((a, b) => b.date.localeCompare(a.date) || b.start_time.localeCompare(a.start_time));
 }
 
 /** Today's date in Honolulu, e.g. "2026-11-15". Cached with the event list. */

@@ -10,7 +10,9 @@ import { EMPTY_PROFILE, hasProfile, parseProfile, type Profile } from "./profile
  * applied once the person signs in.
  */
 /** `going` is the subset of `events` the person has said they are attending. */
-export interface SavedNetwork { events: string[]; clubs: string[]; going: string[] }
+export interface SavedNetwork { events: string[]; clubs: string[]; going: string[]; attended: string[] }
+/** How the networking rating felt after the event. */
+export type FeedbackAnswer = "too_high" | "about_right" | "too_low";
 export type NetworkKind = "events" | "clubs";
 
 interface State {
@@ -18,6 +20,10 @@ interface State {
   status: "loading" | "ready";
   user: { id: string; email: string } | null;
   saved: SavedNetwork;
+  /** Private follow-up notes, by event id. Only the signed-in owner can read them. */
+  notes: Record<string, string>;
+  /** Answers to "was the rating accurate?", by event id */
+  feedback: Record<string, FeedbackAnswer>;
   /** Profession and goals. Kept in the account when signed in, else in this browser. */
   profile: Profile;
   promptOpen: boolean;
@@ -25,8 +31,8 @@ interface State {
   error: string | null;
 }
 
-const EMPTY: SavedNetwork = { events: [], clubs: [], going: [] };
-const SERVER: State = { status: "loading", user: null, saved: EMPTY, profile: EMPTY_PROFILE, promptOpen: false, error: null };
+const EMPTY: SavedNetwork = { events: [], clubs: [], going: [], attended: [] };
+const SERVER: State = { status: "loading", user: null, saved: EMPTY, notes: {}, feedback: {}, profile: EMPTY_PROFILE, promptOpen: false, error: null };
 const PENDING_KEY = "pathcross.network.pending";
 const LEGACY_KEY = "pathcross.network.v1"; // picks made before accounts existed
 const PROFILE_KEY = "pathcross.profile.v1";
@@ -72,19 +78,28 @@ async function loadFor(user: { id: string; email: string }) {
   for (const p of pending.filter((x) => x.going && x.kind === "events")) {
     await supabase.from("network_items").update({ going: true }).eq("user_id", user.id).eq("kind", "events").eq("item_id", p.id);
   }
-  type Row = { kind: string; item_id: string; going?: boolean };
+  type Row = { kind: string; item_id: string; going?: boolean; attended?: boolean; note?: string | null };
   type Result = { data: Row[] | null; error: { code?: string } | null };
-  let res = (await supabase.from("network_items").select("kind,item_id,going").order("created_at")) as unknown as Result;
-  // "going" is a newer column; before supabase/network-going.sql has been run, load without it.
-  if (res.error?.code === "42703") res = (await supabase.from("network_items").select("kind,item_id").order("created_at")) as unknown as Result;
+  let res: Result = { data: null, error: null };
+  // Newer columns come from supabase/network-going.sql and network-followup.sql; load without whichever are not there yet.
+  for (const cols of ["kind,item_id,going,attended,note", "kind,item_id,going", "kind,item_id"]) {
+    res = (await supabase.from("network_items").select(cols).order("created_at")) as unknown as Result;
+    if (res.error?.code !== "42703") break;
+  }
+  const fb = (await supabase.from("rating_feedback").select("event_id,answer")) as unknown as { data: { event_id: string; answer: FeedbackAnswer }[] | null };
   if (state.user?.id !== user.id) return; // signed out meanwhile
   if (res.error) return set({ status: "ready", error: "We couldn't load your saved network. Please try again." });
-  const saved: SavedNetwork = { events: [], clubs: [], going: [] };
+  const saved: SavedNetwork = { events: [], clubs: [], going: [], attended: [] };
+  const notes: Record<string, string> = {};
   for (const r of res.data ?? []) {
     if (r.kind === "events" || r.kind === "clubs") saved[r.kind as NetworkKind].push(r.item_id);
     if (r.kind === "events" && r.going) saved.going.push(r.item_id);
+    if (r.kind === "events" && r.attended) saved.attended.push(r.item_id);
+    if (r.kind === "events" && r.note) notes[r.item_id] = r.note;
   }
-  set({ status: "ready", saved, error: null });
+  const feedback: Record<string, FeedbackAnswer> = {};
+  for (const f of fb.data ?? []) feedback[f.event_id] = f.answer;
+  set({ status: "ready", saved, notes, feedback, error: null });
 }
 
 function localProfile(): Profile {
@@ -102,7 +117,7 @@ function start() {
     const u = session?.user;
     const next = u ? { id: u.id, email: u.email ?? "" } : null;
     if (next?.id === state.user?.id && state.status === "ready") return;
-    if (!next) return set({ status: "ready", user: null, saved: EMPTY });
+    if (!next) return set({ status: "ready", user: null, saved: EMPTY, notes: {}, feedback: {} });
     // The account's profile wins; answers given before signing in fill an empty one.
     const fromAccount = parseProfile(u?.user_metadata);
     const adopt = !hasProfile(fromAccount) && hasProfile(state.profile);
@@ -138,7 +153,7 @@ async function toggle(kind: NetworkKind, id: string) {
   }
   const had = saved[kind].includes(id);
   const before = saved;
-  set({ saved: { ...saved, [kind]: had ? saved[kind].filter((x) => x !== id) : [...saved[kind], id], going: had && kind === "events" ? saved.going.filter((x) => x !== id) : saved.going }, error: null });
+  set({ saved: { ...saved, [kind]: had ? saved[kind].filter((x) => x !== id) : [...saved[kind], id], going: had && kind === "events" ? saved.going.filter((x) => x !== id) : saved.going, attended: had && kind === "events" ? saved.attended.filter((x) => x !== id) : saved.attended }, error: null });
   const q = had
     ? supabase.from("network_items").delete().eq("user_id", user.id).eq("kind", kind).eq("item_id", id)
     : supabase.from("network_items").insert({ user_id: user.id, kind, item_id: id });
@@ -166,10 +181,42 @@ async function toggleGoing(id: string) {
   if (error && error.code !== "23505") set({ saved: before, error: "That change didn't save. Please try again." });
 }
 
+/** "I went": marks a past event in My Network as attended, which opens the private note. */
+async function setAttended(id: string, on: boolean) {
+  const { user, saved } = state;
+  if (!user || !supabase || !saved.events.includes(id)) return;
+  const before = saved;
+  set({ saved: { ...saved, attended: on ? [...saved.attended.filter((x) => x !== id), id] : saved.attended.filter((x) => x !== id) }, error: null });
+  const { error } = await supabase.from("network_items").update({ attended: on }).eq("user_id", user.id).eq("kind", "events").eq("item_id", id);
+  if (error) set({ saved: before, error: "That change didn't save. Please try again." });
+}
+
+/** Saves the private "who did you meet?" note for an event. An empty note clears it. */
+async function saveNote(id: string, text: string): Promise<boolean> {
+  const { user, notes } = state;
+  if (!user || !supabase) return false;
+  const note = text.trim().slice(0, 2000);
+  const next = { ...notes };
+  if (note) next[id] = note; else delete next[id];
+  set({ notes: next, error: null });
+  const { error } = await supabase.from("network_items").update({ note: note || null }).eq("user_id", user.id).eq("kind", "events").eq("item_id", id);
+  if (error) { set({ notes, error: "We couldn't save your note. Please try again." }); return false; }
+  return true;
+}
+
+/** Records whether the networking rating felt accurate after the event. */
+async function setFeedback(id: string, answer: FeedbackAnswer, starsShown: number) {
+  const { user, feedback } = state;
+  if (!user || !supabase) return;
+  set({ feedback: { ...feedback, [id]: answer }, error: null });
+  const { error } = await supabase.from("rating_feedback").upsert({ user_id: user.id, event_id: id, answer, stars_shown: starsShown }, { onConflict: "user_id,event_id" });
+  if (error) set({ feedback, error: "We couldn't save your answer. Please try again." });
+}
+
 async function clear() {
   const { user, saved } = state;
   if (!user || !supabase) return;
-  set({ saved: EMPTY, error: null });
+  set({ saved: EMPTY, notes: {}, error: null });
   const { error } = await supabase.from("network_items").delete().eq("user_id", user.id);
   if (error) set({ saved, error: "We couldn't clear your network. Please try again." });
 }
@@ -199,6 +246,9 @@ export function useNetwork() {
     isGoing: (id: string) => s.saved.going.includes(id),
     toggle,
     toggleGoing,
+    setAttended,
+    saveNote,
+    setFeedback,
     clear,
     saveProfile,
     openPrompt,

@@ -13,12 +13,12 @@ export function HeroOverlay({
       <div className="absolute inset-0">{children}</div>
       <div className="pointer-events-none relative mx-auto flex h-full max-w-6xl flex-col justify-between gap-4 px-4 py-6 sm:px-6 sm:py-10">
         <div className="pointer-events-auto max-w-xl rounded-xl bg-forest/95 p-5 text-cream shadow-xl backdrop-blur sm:p-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-clay-300">Honolulu · Events, clubs and people worth meeting</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-clay-300">Honolulu · Networking made efficient for business professionals</p>
           <h1 className="text-3xl font-semibold sm:text-5xl">
-            Every good connection starts with <span className="italic text-clay-300">crossing paths.</span>
+            Tell us what you do. <span className="italic text-clay-300">Get the events most worth your time.</span>
           </h1>
           <p className="mt-4 hidden text-cream/75 sm:block">
-            Your one-stop shop for building a professional network in Honolulu. Find the events, clubs and groups worth your time, all in one place.
+            Two quick questions, and PathCross ranks Honolulu&apos;s networking events, clubs and groups for your profession and goals. One place to build your network.
           </p>
           <div className="mt-5 sm:mt-6"><ProfileSteps tone="dark" /></div>
           <p className="mt-4 text-sm text-cream/70">Or <Link href="/events" className="font-semibold text-clay-300 hover:text-white">browse every event</Link>.</p>
