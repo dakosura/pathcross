@@ -1,6 +1,7 @@
 "use client";
 import { useSyncExternalStore } from "react";
 import { supabase } from "./supabase";
+import { setIgnored } from "./ignore-me";
 import { EMPTY_PROFILE, hasProfile, parseProfile, type Profile } from "./profile";
 
 /**
@@ -102,6 +103,15 @@ async function loadFor(user: { id: string; email: string }) {
   set({ status: "ready", saved, notes, feedback, error: null });
 }
 
+/** If the person who just signed in is a site admin, stop counting this browser's visits. */
+async function ignoreIfAdmin(token?: string) {
+  if (!token) return;
+  try {
+    const res = await fetch("/api/ops/me", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+    if (res.ok && (await res.json()).admin === true) setIgnored(true);
+  } catch { /* offline: nothing to do */ }
+}
+
 function localProfile(): Profile {
   try { return parseProfile(JSON.parse(window.localStorage.getItem(PROFILE_KEY) ?? "null")); } catch { return EMPTY_PROFILE; }
 }
@@ -125,6 +135,7 @@ function start() {
     // Deferred: Supabase calls made inside this callback can deadlock
     setTimeout(() => {
       void loadFor(next);
+      void ignoreIfAdmin(session?.access_token);
       if (adopt) void client.auth.updateUser({ data: { profession: state.profile.profession ?? null, goals: state.profile.goals } });
     }, 0);
   });

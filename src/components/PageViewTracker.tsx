@@ -1,19 +1,21 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { isIgnored } from "@/lib/ignore-me";
 
 /**
  * Privacy-friendly visit counter. Sends the page path, the site the visitor
  * came from and any utm_* tags to /api/track. It sets no cookies and writes
  * nothing to the browser, and it does nothing for people who send a Do Not
- * Track or Global Privacy Control signal.
+ * Track or Global Privacy Control signal, or on a browser where the site
+ * admin has chosen not to be counted (see lib/ignore-me.ts).
  */
 let first = true; // the referrer and utm tags belong to the first page of a visit only
 let lastPath = "";
 
 const blocked = () => {
   const n = navigator as Navigator & { globalPrivacyControl?: boolean };
-  return n.doNotTrack === "1" || n.globalPrivacyControl === true || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  return n.doNotTrack === "1" || n.globalPrivacyControl === true || location.hostname === "localhost" || location.hostname === "127.0.0.1" || isIgnored();
 };
 
 function send(payload: Record<string, unknown>) {
