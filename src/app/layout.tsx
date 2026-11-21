@@ -12,7 +12,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "PathCross: Networking events and clubs in Honolulu, Hawaiʻi", template: "%s · PathCross" },
+  title: { default: "PathCross: Efficient Networking for Business Professionals in Honolulu", template: "%s · PathCross" },
   description: site.description,
   metadataBase: new URL(site.url),
   // Each page's canonical address is its own path on the www domain.
@@ -23,11 +23,11 @@ export const metadata: Metadata = {
     siteName: site.name,
     locale: "en_US",
     url: "./",
-    title: "PathCross: Networking events and clubs in Honolulu, Hawaiʻi",
+    title: "PathCross: Efficient Networking for Business Professionals in Honolulu",
     description: site.description,
     images: [{ url: "/brand/og.jpg", width: 1200, height: 630, alt: "PathCross" }],
   },
-  twitter: { card: "summary_large_image", title: "PathCross: Networking events and clubs in Honolulu", description: site.description, images: ["/brand/og.jpg"] },
+  twitter: { card: "summary_large_image", title: "PathCross: Efficient Networking for Business Professionals in Honolulu", description: site.description, images: ["/brand/og.jpg"] },
 };
 
 // Tells search engines who runs the site and what it is.
