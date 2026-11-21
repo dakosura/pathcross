@@ -9,7 +9,8 @@ import { EMPTY_PROFILE, hasProfile, parseProfile, type Profile } from "./profile
  * adding a pick while signed out opens the sign-in prompt and the pick is
  * applied once the person signs in.
  */
-export interface SavedNetwork { events: string[]; clubs: string[] }
+/** `going` is the subset of `events` the person has said they are attending. */
+export interface SavedNetwork { events: string[]; clubs: string[]; going: string[] }
 export type NetworkKind = "events" | "clubs";
 
 interface State {
@@ -24,7 +25,7 @@ interface State {
   error: string | null;
 }
 
-const EMPTY: SavedNetwork = { events: [], clubs: [] };
+const EMPTY: SavedNetwork = { events: [], clubs: [], going: [] };
 const SERVER: State = { status: "loading", user: null, saved: EMPTY, profile: EMPTY_PROFILE, promptOpen: false, error: null };
 const PENDING_KEY = "pathcross.network.pending";
 const LEGACY_KEY = "pathcross.network.v1"; // picks made before accounts existed
@@ -42,14 +43,14 @@ function set(patch: Partial<State>) {
 const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 
 /** Picks waiting for sign-in: the one just clicked, plus any from the old browser-only version. */
-function takePending(): { kind: NetworkKind; id: string }[] {
-  const out: { kind: NetworkKind; id: string }[] = [];
+function takePending(): { kind: NetworkKind; id: string; going?: boolean }[] {
+  const out: { kind: NetworkKind; id: string; going?: boolean }[] = [];
   try {
     const legacy = JSON.parse(window.localStorage.getItem(LEGACY_KEY) ?? "null");
     strings(legacy?.events).forEach((id) => out.push({ kind: "events", id }));
     strings(legacy?.clubs).forEach((id) => out.push({ kind: "clubs", id }));
     const p = JSON.parse(window.localStorage.getItem(PENDING_KEY) ?? "null");
-    if ((p?.kind === "events" || p?.kind === "clubs") && typeof p?.id === "string") out.push({ kind: p.kind, id: p.id });
+    if ((p?.kind === "events" || p?.kind === "clubs") && typeof p?.id === "string") out.push({ kind: p.kind, id: p.id, going: p.going === true });
     window.localStorage.removeItem(LEGACY_KEY);
     window.localStorage.removeItem(PENDING_KEY);
   } catch {
@@ -67,11 +68,22 @@ async function loadFor(user: { id: string; email: string }) {
       { onConflict: "user_id,kind,item_id", ignoreDuplicates: true },
     );
   }
-  const { data, error } = await supabase.from("network_items").select("kind,item_id").order("created_at");
+  // Picks made with "I'm going" while signed out are marked once the rows exist.
+  for (const p of pending.filter((x) => x.going && x.kind === "events")) {
+    await supabase.from("network_items").update({ going: true }).eq("user_id", user.id).eq("kind", "events").eq("item_id", p.id);
+  }
+  type Row = { kind: string; item_id: string; going?: boolean };
+  type Result = { data: Row[] | null; error: { code?: string } | null };
+  let res = (await supabase.from("network_items").select("kind,item_id,going").order("created_at")) as unknown as Result;
+  // "going" is a newer column; before supabase/network-going.sql has been run, load without it.
+  if (res.error?.code === "42703") res = (await supabase.from("network_items").select("kind,item_id").order("created_at")) as unknown as Result;
   if (state.user?.id !== user.id) return; // signed out meanwhile
-  if (error) return set({ status: "ready", error: "We couldn't load your saved network. Please try again." });
-  const saved: SavedNetwork = { events: [], clubs: [] };
-  for (const r of data ?? []) if (r.kind === "events" || r.kind === "clubs") saved[r.kind as NetworkKind].push(r.item_id as string);
+  if (res.error) return set({ status: "ready", error: "We couldn't load your saved network. Please try again." });
+  const saved: SavedNetwork = { events: [], clubs: [], going: [] };
+  for (const r of res.data ?? []) {
+    if (r.kind === "events" || r.kind === "clubs") saved[r.kind as NetworkKind].push(r.item_id);
+    if (r.kind === "events" && r.going) saved.going.push(r.item_id);
+  }
   set({ status: "ready", saved, error: null });
 }
 
@@ -126,11 +138,31 @@ async function toggle(kind: NetworkKind, id: string) {
   }
   const had = saved[kind].includes(id);
   const before = saved;
-  set({ saved: { ...saved, [kind]: had ? saved[kind].filter((x) => x !== id) : [...saved[kind], id] }, error: null });
+  set({ saved: { ...saved, [kind]: had ? saved[kind].filter((x) => x !== id) : [...saved[kind], id], going: had && kind === "events" ? saved.going.filter((x) => x !== id) : saved.going }, error: null });
   const q = had
     ? supabase.from("network_items").delete().eq("user_id", user.id).eq("kind", kind).eq("item_id", id)
     : supabase.from("network_items").insert({ user_id: user.id, kind, item_id: id });
   const { error } = await q;
+  if (error && error.code !== "23505") set({ saved: before, error: "That change didn't save. Please try again." });
+}
+
+/** "I'm going": adds the event to My Network if needed and marks it as one the person is attending. */
+async function toggleGoing(id: string) {
+  const { user, saved } = state;
+  if (!user || !supabase) {
+    try { window.localStorage.setItem(PENDING_KEY, JSON.stringify({ kind: "events", id, going: true })); } catch { /* ignore */ }
+    return set({ promptOpen: true });
+  }
+  const isGoing = saved.going.includes(id);
+  const inNetwork = saved.events.includes(id);
+  const before = saved;
+  set({
+    saved: { ...saved, events: inNetwork ? saved.events : [...saved.events, id], going: isGoing ? saved.going.filter((x) => x !== id) : [...saved.going, id] },
+    error: null,
+  });
+  const { error } = inNetwork
+    ? await supabase.from("network_items").update({ going: !isGoing }).eq("user_id", user.id).eq("kind", "events").eq("item_id", id)
+    : await supabase.from("network_items").insert({ user_id: user.id, kind: "events", item_id: id, going: true });
   if (error && error.code !== "23505") set({ saved: before, error: "That change didn't save. Please try again." });
 }
 
@@ -164,7 +196,9 @@ export function useNetwork() {
   return {
     ...s,
     has: (kind: NetworkKind, id: string) => s.saved[kind].includes(id),
+    isGoing: (id: string) => s.saved.going.includes(id),
     toggle,
+    toggleGoing,
     clear,
     saveProfile,
     openPrompt,

@@ -90,7 +90,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
   const [q, setQ] = useState("");
   // Show every available club and event on the map, not just the visitor's picks.
   const [seeAll, setSeeAll] = useState(false);
-  const { saved, has, toggle, clear, user, status, signOut, error } = useNetwork();
+  const { saved, has, isGoing, toggle, clear, user, status, signOut, error } = useNetwork();
 
   // The visitor's picks that can be placed on the map, plus everything else when "See all?" is on
   const pins = useMemo<Pin[]>(() => {
@@ -260,7 +260,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
           ) : (
             <ul className="space-y-0.5">
               {shownEvents.map((e) => (
-                <Row key={e.id} on={has("events", e.id)} onClick={() => toggle("events", e.id)} title={e.title} sub={`${formatDate(e.date)} · ${formatTime(e.start_time)} · ${e.online ? "Online" : e.location.venue}`} color={categoryStyle[e.category].hex} tag={e.lat == null ? (e.online ? "Online" : "No pin yet") : undefined} />
+                <Row key={e.id} on={has("events", e.id)} onClick={() => toggle("events", e.id)} title={e.title} sub={`${formatDate(e.date)} · ${formatTime(e.start_time)} · ${e.online ? "Online" : e.location.venue}`} color={categoryStyle[e.category].hex} tag={isGoing(e.id) ? "Going" : e.lat == null ? (e.online ? "Online" : "No pin yet") : undefined} />
               ))}
             </ul>
           )}

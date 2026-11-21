@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Event } from "@/types";
 import { formatDate, formatRange } from "@/lib/format";
-import { PromptBox } from "./PromptBox";
+import { ProfileSteps } from "./ProfileSteps";
 
 /** Shared hero UI (headline panel + arrival card) layered over any map. */
 export function HeroOverlay({
@@ -20,7 +20,8 @@ export function HeroOverlay({
           <p className="mt-4 hidden text-cream/75 sm:block">
             Your one-stop shop for building a professional network in Honolulu. Find the events, clubs and groups worth your time, all in one place.
           </p>
-          <div className="mt-5 sm:mt-6"><PromptBox /></div>
+          <div className="mt-5 sm:mt-6"><ProfileSteps tone="dark" /></div>
+          <p className="mt-4 text-sm text-cream/70">Or <Link href="/events" className="font-semibold text-clay-300 hover:text-white">browse every event</Link>.</p>
         </div>
 
         <div className="flex items-end justify-between gap-4 pb-5 pl-28">
