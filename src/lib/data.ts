@@ -196,6 +196,82 @@ const realEvents: Event[] = [
     lat: 21.27946,
     lng: -157.82639,
   },
+  {
+    id: "hirei-monthly-dec3",
+    club_id: "hawaii-real-estate-investors",
+    title: "Hawaii Real Estate Investors Monthly Meeting",
+    category: "Real Estate",
+    date: "2026-12-03",
+    start_time: "18:00",
+    end_time: "20:30",
+    location: { venue: "McCully-Moiliili Public Library", city: "Honolulu" },
+    address: "2211 S King St., Honolulu, HI 96826",
+    organizer: "Hawaii Real Estate Investors",
+    source_url: "https://www.meetup.com/hawaii-rei/events/317157294/",
+    city: "Honolulu",
+    featured: false,
+    price: "$10 at the door",
+    note: "Doors open at 5:30 PM.",
+    description:
+      "The main monthly meeting of the Hawaii Real Estate Investors group, held on the first Thursday of the month: education and networking for people starting out in real estate investing and for experienced investors.",
+    lat: 21.29351,
+    lng: -157.82779,
+  },
+  {
+    id: "rei-aloha-happy-hour-dec10",
+    club_id: "rei-aloha",
+    title: "Passive Investor Happy Hour at PAI Honolulu",
+    category: "Real Estate",
+    date: "2026-12-10",
+    start_time: "19:45",
+    end_time: "21:45",
+    location: { venue: "PAI Honolulu", city: "Honolulu" },
+    organizer: "REI Aloha: Hawaii Passive Accredited Investor Club",
+    source_url: "https://www.meetup.com/rei808-passive-real-estate-investing-for-the-working-class/events/pjxlbvyjcqbnb/",
+    city: "Honolulu",
+    featured: false,
+    note: "For accredited and experienced passive investors, including those visiting the islands.",
+    description:
+      "An open evening for passive investors in private real estate: open networking, a short presentation on the month's topic followed by discussion, then mastermind breakouts and structured networking.",
+  },
+  {
+    id: "blockchain-paradise-pau-hana-dec11",
+    club_id: "blockchain-in-paradise",
+    title: "Blockchain in Paradise: End of Year Pau Hana",
+    category: "Finance",
+    date: "2026-12-11",
+    start_time: "18:00",
+    end_time: "20:00",
+    location: { venue: "Hana Koa Brewing Co", city: "Honolulu" },
+    address: "962 Kawaiahao St., Honolulu, HI 96814",
+    organizer: "Blockchain in Paradise",
+    source_url: "https://www.meetup.com/hawaii-blockchain-innovation/events/317502243/",
+    city: "Honolulu",
+    featured: false,
+    description:
+      "An end-of-year pau hana to catch up, talk story and close out 2026 together. Relaxed conversation about blockchain, crypto and digital money, with familiar faces, new ones and plenty of time to connect.",
+    lat: 21.29717,
+    lng: -157.85292,
+  },
+  {
+    id: "ccim-irem-forecast-jan21",
+    club_id: "hawaii-ccim-chapter",
+    title: "CCIM/IREM Real Estate Forecast",
+    category: "Real Estate",
+    date: "2027-01-21",
+    start_time: "08:30",
+    end_time: "11:30",
+    location: { venue: "Hawaii Prince Hotel, Piinaio Ballroom", city: "Honolulu" },
+    address: "100 Holomoana St., Honolulu, HI 96815",
+    organizer: "Hawaii CCIM Chapter and IREM",
+    source_url: "https://ccimhawaii.starchapter.com/meetinginfo.php",
+    city: "Honolulu",
+    featured: false,
+    description:
+      "The CCIM and IREM chapters look ahead at the future of commercial real estate in Hawaiʻi, with the market outlook and a morning of networking with commercial real estate professionals.",
+    lat: 21.28617,
+    lng: -157.84002,
+  },
 ];
 
 /** Hand-verified listings. Also the fallback when the database is unreachable. */
@@ -219,6 +295,10 @@ const sourceDefaults: Record<string, { club_id: string; online?: boolean; venue?
   "meetup-code-with-aloha": { club_id: "code-with-aloha", venue: "Entrepreneurs Sandbox", address: "643 Ilalo St., Honolulu, HI 96813", lat: 21.29684, lng: -157.86349 },
   "meetup-honolulu-startups": { club_id: "honolulu-startups", online: true, venue: "Online" },
   "chamber-hawaii": { club_id: "chamber-hawaii" },
+  "meetup-blockchain-in-paradise": { club_id: "blockchain-in-paradise" },
+  "meetup-honolulu-bitcoin": { club_id: "honolulu-bitcoin" },
+  "meetup-hawaii-rei": { club_id: "hawaii-real-estate-investors", venue: "McCully-Moiliili Public Library", address: "2211 S King St., Honolulu, HI 96826", lat: 21.29351, lng: -157.82779 },
+  "meetup-rei-aloha": { club_id: "rei-aloha" },
 };
 
 /** Chamber events run by its Young Professionals program are titled "YP ...". */
@@ -265,7 +345,7 @@ async function loadUpcoming(): Promise<Event[]> {
   return list.filter((e) => e.date >= today);
 }
 
-export const categories = ["Finance", "Tech", "General Professional", "Startup", "Community", "Fitness", "Volunteer"] as const;
+export const categories = ["Finance", "Tech", "General Professional", "Startup", "Real Estate", "Food & Drink", "Sports", "Community", "Fitness", "Volunteer"] as const;
 
 /** How far ahead the calendar lists each repeating event. */
 const CALENDAR_DAYS = 70;

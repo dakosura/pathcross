@@ -238,4 +238,30 @@ export const series: Series[] = [
     venue: "James Campbell National Wildlife Refuge", city: "Kahuku",
     start: "09:00", end: "12:00", dates: ["2026-11-19", "2026-12-10"], label: "Monthly",
   },
+
+  // ------------------------------------------------------------------ Sports
+  {
+    id: "south-shore-surf-sunday", title: "Sunday Evening Surf at Waikīkī Canoes", category: "Sports", club_id: "south-shore-surf-club",
+    description: "A community surf session with South Shore Surf Club: meet at the Duke Kahanamoku statue, paddle out to Canoes and surf through sunset, with pau hana afterward now and then. Come solo or bring friends.",
+    organizer: "South Shore Surf Club", source_url: "https://www.meetup.com/southshoresurfclub/", registration_url: "https://www.meetup.com/southshoresurfclub/", price: "Free",
+    note: "A community surf meetup, not a lesson. RSVP on Meetup; dates are as listed there.",
+    venue: "Duke Kahanamoku Statue, Waikīkī", address: "Kalākaua Ave., Honolulu, HI 96815", lat: 21.27548, lng: -157.82534,
+    start: "16:00", end: "18:00", dates: ["2026-11-22", "2026-12-06", "2026-12-20", "2027-01-03"], label: "Every other Sunday",
+  },
+  {
+    id: "south-shore-skate-tuesday", title: "Weeknight Skate Session & Pau Hana at Magic Island", category: "Sports", club_id: "south-shore-surf-club",
+    description: "Tuesday-night skating at Magic Island with South Shore Surf Club. Skateboards, surf skates, longboards, roller blades and roller skates are all welcome, whether you can skate or want to learn, with pau hana afterward.",
+    organizer: "South Shore Surf Club", source_url: "https://www.meetup.com/southshoresurfclub/", registration_url: "https://www.meetup.com/southshoresurfclub/", price: "Free",
+    note: "All wheels and skill levels welcome. RSVP on Meetup.",
+    venue: "Magic Island, Ala Moana Regional Park", city: "Honolulu",
+    start: "19:00", end: "22:00", days: [2],
+  },
+  {
+    id: "honolulu-grass-volleyball", title: "Grass Volleyball at Kapiʻolani Regional Park", category: "Sports", club_id: "honolulu-volleyball-club",
+    description: "Pickup grass volleyball with the Honolulu Volleyball Club on Wednesday and Saturday afternoons. All levels are welcome: sweat it out, get your steps in and spread aloha.",
+    organizer: "Honolulu Volleyball Club", source_url: "https://www.meetup.com/honolulu-competitive-grass-volleyball/", registration_url: "https://www.meetup.com/honolulu-competitive-grass-volleyball/", price: "Free",
+    note: "Times as listed on Meetup in November 2026. Check the group page before going.",
+    venue: "Kapiʻolani Regional Park", address: "3840 Paki Ave., Honolulu, HI 96815", lat: 21.26607, lng: -157.81686,
+    start: "15:30", end: "19:00", days: [3, 6], label: "Wednesdays and Saturdays",
+  },
 ];

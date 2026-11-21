@@ -42,6 +42,10 @@ export const sources: Source[] = [
   { type: "ics", key: "meetup-honolulu-tech-network", url: "https://www.meetup.com/honolulu-tech-network/events/ical/", organizer: "Honolulu Tech Network", category: "Tech" },
   { type: "ics", key: "meetup-code-with-aloha", url: "https://www.meetup.com/code-with-aloha/events/ical/", organizer: "Code with Aloha", category: "Tech" },
   { type: "ics", key: "meetup-honolulu-startups", url: "https://www.meetup.com/honolulu-technology-startups-meetup-group/events/ical/", organizer: "Honolulu Technology Startups Meetup", category: "Startup" },
+  { type: "ics", key: "meetup-blockchain-in-paradise", url: "https://www.meetup.com/honolulu-crypto-meetup-group/events/ical/", organizer: "Blockchain in Paradise", category: "Finance" },
+  { type: "ics", key: "meetup-honolulu-bitcoin", url: "https://www.meetup.com/honolulu-bitcoin/events/ical/", organizer: "Honolulu Bitcoin", category: "Finance" },
+  { type: "ics", key: "meetup-hawaii-rei", url: "https://www.meetup.com/hawaii-rei/events/ical/", organizer: "Hawaii Real Estate Investors", category: "Real Estate" },
+  { type: "ics", key: "meetup-rei-aloha", url: "https://www.meetup.com/rei808-passive-real-estate-investing-for-the-working-class/events/ical/", organizer: "REI Aloha: Hawaii Passive Accredited Investor Club", category: "Real Estate" },
   { type: "microdata", key: "chamber-hawaii", calendarUrl: "https://business.cochawaii.org/events/calendar", organizer: "Chamber of Commerce Hawaii", category: "General Professional" },
   // { type: "eventbrite", key: "eb-example-org", orgId: "123456789", organizer: "Example Org", category: "General Professional" },
 ];
