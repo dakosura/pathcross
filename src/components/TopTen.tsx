@@ -8,6 +8,7 @@ import { rankEvents } from "@/lib/rating";
 import { CategoryBadge } from "./CategoryBadge";
 import { MatchBadge } from "./EventRating";
 import { ProfileSteps } from "./ProfileSteps";
+import { SaveButton } from "./SaveButton";
 import { Stars } from "./Stars";
 
 /** The ten best-rated upcoming events for whoever is looking, with the profile form that drives it. */
@@ -31,8 +32,8 @@ export function TopTen({ events }: { events: Event[] }) {
         )}
         <ol className="mt-6 space-y-4">
           {top.map(({ ev, rating }, i) => (
-            <li key={ev.id}>
-              <Link href={`/events/${ev.id}`} className="flex items-start gap-4 rounded-2xl border border-line bg-card p-5 transition hover:border-clay-300 hover:shadow-md">
+            <li key={ev.id} className="relative">
+              <Link href={`/events/${ev.id}`} className="flex items-start gap-4 rounded-2xl border border-line bg-card p-5 pb-14 transition hover:border-clay-300 hover:shadow-md">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-forest font-bold text-cream">{i + 1}</span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -47,6 +48,7 @@ export function TopTen({ events }: { events: Event[] }) {
                   <div className="mt-3"><CategoryBadge category={ev.category} /></div>
                 </div>
               </Link>
+              <div className="absolute bottom-4 right-5 z-10"><SaveButton kind="events" id={ev.id} /></div>
             </li>
           ))}
         </ol>

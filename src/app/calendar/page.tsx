@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarView } from "@/components/CalendarView";
+import { CalendarSwitcher } from "@/components/CalendarSwitcher";
 import { PageHeader } from "@/components/PageHeader";
 import { categories, getCalendarEvents, getToday } from "@/lib/data";
 
@@ -10,10 +10,10 @@ export default async function CalendarPage() {
   return (
     <>
       <PageHeader eyebrow="Oʻahu · Month by month" title="Event calendar">
-        Every upcoming event, including weekly markets, run clubs and volunteer shifts, in one view. Pick a day to see what&apos;s on and where to sign up.
+        The Full calendar shows every upcoming event, including weekly markets, run clubs and volunteer shifts. My calendar fills itself from My Network: add an event or a club and it appears there.
       </PageHeader>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <CalendarView events={events} today={today} categories={categories} />
+        <CalendarSwitcher events={events} today={today} categories={categories} />
       </div>
     </>
   );

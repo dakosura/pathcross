@@ -14,7 +14,12 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function CalendarView({ events, today, categories }: { events: Event[]; today: string; categories: readonly EventCategory[] }) {
+/**
+ * `mineLabels` switches on My Calendar mode: `events` are already the person's own, so nothing is hidden
+ * or offered for hiding, and each event id maps to the club it came from (or null if added directly).
+ */
+export function CalendarView({ events, today, categories, mineLabels }: { events: Event[]; today: string; categories: readonly EventCategory[]; mineLabels?: Record<string, string | null> }) {
+  const isMine = mineLabels !== undefined;
   const [ty, tm] = today.split("-").map(Number);
   const [cursor, setCursor] = useState({ y: ty, m: tm - 1 });
   const [selected, setSelected] = useState<string | null>(today);
@@ -37,11 +42,11 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
     const map = new Map<string, Event[]>();
     for (const e of events) {
       if (category !== "All" && e.category !== category) continue;
-      if (e.series_id && hidden.includes(e.series_id)) continue;
+      if (!isMine && e.series_id && hidden.includes(e.series_id)) continue;
       map.set(e.date, [...(map.get(e.date) ?? []), e]);
     }
     return map;
-  }, [events, category, hidden]);
+  }, [events, category, hidden, isMine]);
 
   // Titles of the hidden repeating events, so each can be brought back.
   const hiddenList = useMemo(() => {
@@ -77,7 +82,7 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
         ))}
       </div>
 
-      {hiddenList.length > 0 && (
+      {!isMine && hiddenList.length > 0 && (
         <div className="mb-4 rounded-2xl border border-line bg-sand/60 p-3 text-sm text-bark" aria-label="Hidden repeating events">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-semibold text-ink">Hidden from your calendar ({hiddenList.length})</p>
@@ -149,7 +154,7 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
             {selected && <button onClick={() => setSelected(null)} className="text-sm font-semibold text-clay-700 hover:underline">Show whole month</button>}
           </div>
           {agenda.length === 0 ? (
-            <p className="rounded-2xl bg-sand p-8 text-center text-sm text-bark">{selected ? "Nothing listed for this day." : "No events listed for this month yet."}</p>
+            <p className="rounded-2xl bg-sand p-8 text-center text-sm text-bark">{isMine ? (selected ? "Nothing from your network on this day." : "Nothing from your network this month.") : selected ? "Nothing listed for this day." : "No events listed for this month yet."}</p>
           ) : (
             <ul className="space-y-3">
               {agenda.map((e) => (
@@ -163,7 +168,8 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
                     <SaveButton kind="events" id={e.id} />
                     <SignupLink event={e} />
                   </div>
-                  {e.series_id && (
+                  {isMine && mineLabels?.[e.id] && <p className="mt-2 text-xs font-semibold text-moss">From your club: {mineLabels[e.id]}</p>}
+                  {!isMine && e.series_id && (
                     <button type="button" onClick={() => hide(e.series_id!)} className="mt-3 text-xs font-semibold text-bark underline-offset-2 hover:text-clay-700 hover:underline">
                       Hide &ldquo;{e.title}&rdquo; from my calendar
                     </button>
@@ -174,7 +180,7 @@ export function CalendarView({ events, today, categories }: { events: Event[]; t
           )}
         </section>
       </div>
-      {open && <DayView date={open} events={byDay.get(open) ?? []} today={today} onClose={closeDay} onMove={moveDay} onHide={hide} />}
+      {open && <DayView date={open} events={byDay.get(open) ?? []} today={today} onClose={closeDay} onMove={moveDay} onHide={hide} canHide={!isMine} />}
     </div>
   );
 }

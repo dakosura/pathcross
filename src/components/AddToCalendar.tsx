@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import type { Event } from "@/types";
-import { googleCalendarUrl, icsFile } from "@/lib/calendar-links";
+import { downloadIcs, googleCalendarUrl, icsFile } from "@/lib/calendar-links";
 
 /** A small menu to put an event on Google Calendar, or download an .ics file for Apple Calendar and Outlook. */
 export function AddToCalendar({ event, size = "sm" }: { event: Event; size?: "sm" | "lg" }) {
@@ -9,14 +9,7 @@ export function AddToCalendar({ event, size = "sm" }: { event: Event; size?: "sm
   const sizing = size === "lg" ? "w-full justify-center px-4 py-3 text-sm" : "px-3 py-1.5 text-xs";
 
   function download() {
-    const url = URL.createObjectURL(new Blob([icsFile(event)], { type: "text/calendar;charset=utf-8" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${event.id}.ics`;
-    document.body.append(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    downloadIcs(`${event.id}.ics`, icsFile(event));
     if (menu.current) menu.current.open = false;
   }
 
