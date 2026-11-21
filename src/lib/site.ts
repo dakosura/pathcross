@@ -9,5 +9,5 @@ export const site = {
     "Your one-stop shop for building a professional network in Honolulu, Hawaiʻi. Find networking events, business clubs and groups in one place, matched to what you do. Free.",
   contactEmail: "hello@joinpathcross.com",
   /** Shown as "Last updated" on the legal pages. Change whenever their wording changes. */
-  policiesUpdated: "November 20, 2026",
+  policiesUpdated: "November 21, 2026",
 };

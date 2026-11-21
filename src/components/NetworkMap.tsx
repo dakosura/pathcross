@@ -6,6 +6,8 @@ import type { Map as MLMap, Marker } from "maplibre-gl";
 import type { Club, Event } from "@/types";
 import { createMap, OAHU } from "@/lib/map";
 import { useNetwork } from "@/lib/network";
+import { FollowUp } from "./FollowUp";
+import { PlannedMonth } from "./PlannedMonth";
 import { SignInForm } from "./SignInForm";
 import { interests, interestById } from "@/lib/interests";
 import { categoryStyle } from "@/lib/categories";
@@ -79,14 +81,14 @@ function Row({ on, onClick, title, sub, tag, color }: { on: boolean; onClick: ()
   );
 }
 
-export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }) {
+export function NetworkMap({ events, past, today, clubs }: { events: Event[]; past: Event[]; today: string; clubs: Club[] }) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const libRef = useRef<any>(null);
   const markers = useRef<Marker[]>([]);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [tab, setTab] = useState<"clubs" | "events">("clubs");
+  const [tab, setTab] = useState<"month" | "clubs" | "events">("month");
   const [q, setQ] = useState("");
   // Show every available club and event on the map, not just the visitor's picks.
   const [seeAll, setSeeAll] = useState(false);
@@ -208,7 +210,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
         <div className="border-b border-line px-5 pb-4 pt-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay-700">Oʻahu</p>
           <h1 className="mt-1 text-3xl font-semibold">My Network</h1>
-          <p className="mt-2 text-sm text-bark">Pick the clubs you belong to and the events you&apos;re going to. Each one lands on your map.</p>
+          <p className="mt-2 text-sm text-bark">Your map of Oʻahu. Add the clubs you belong to and the events you&apos;re going to, and each one lands here as a pin.</p>
           {user && (
             <>
           <div className="mt-4 flex items-center justify-between gap-3 text-sm">
@@ -217,14 +219,14 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
             </p>
             {total > 0 && <button type="button" onClick={clear} className="text-xs font-semibold text-clay-700 hover:underline">Clear all</button>}
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-1 rounded-full bg-sand p-1 text-sm font-semibold" role="tablist">
-            {(["clubs", "events"] as const).map((t) => (
-              <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`rounded-full py-2 capitalize transition ${tab === t ? "bg-card text-forest shadow-sm" : "text-bark hover:text-ink"}`}>
-                {t === "clubs" ? "Clubs & programs" : "Events"}
+          <div className="mt-4 grid grid-cols-3 gap-1 rounded-full bg-sand p-1 text-sm font-semibold" role="tablist">
+            {(["month", "clubs", "events"] as const).map((t) => (
+              <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`rounded-full py-2 transition ${tab === t ? "bg-card text-forest shadow-sm" : "text-bark hover:text-ink"}`}>
+                {t === "month" ? "This month" : t === "clubs" ? "Clubs" : "Events"}
               </button>
             ))}
           </div>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tab === "clubs" ? "Search clubs…" : "Search events…"} aria-label="Search" className="mt-3 w-full rounded-full border border-line bg-white/70 px-4 py-2 text-sm outline-none focus:border-moss" />
+          {tab !== "month" && <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tab === "clubs" ? "Search clubs…" : "Search events…"} aria-label="Search" className="mt-3 w-full rounded-full border border-line bg-white/70 px-4 py-2 text-sm outline-none focus:border-moss" />}
             </>
           )}
         </div>
@@ -242,7 +244,12 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
         {user && error && <p role="alert" className="mx-5 mt-3 rounded-xl bg-clay-50 px-4 py-2.5 text-sm font-medium text-clay-700">{error}</p>}
         {user && (
         <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3 lg:max-h-none">
-          {tab === "clubs" ? (
+          {tab === "month" ? (
+            <>
+              <PlannedMonth events={events} today={today} />
+              <FollowUp past={past} />
+            </>
+          ) : tab === "clubs" ? (
             interests.map((interest) => {
               const list = shownClubs.filter((c) => c.interest === interest.id);
               if (!list.length) return null;
@@ -264,7 +271,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
               ))}
             </ul>
           )}
-          {(tab === "clubs" ? shownClubs.length : shownEvents.length) === 0 && <p className="px-3 py-8 text-center text-sm text-bark">Nothing matches that search.</p>}
+          {tab !== "month" && (tab === "clubs" ? shownClubs.length : shownEvents.length) === 0 && <p className="px-3 py-8 text-center text-sm text-bark">Nothing matches that search.</p>}
         </div>
         )}
         {user && (
@@ -275,7 +282,7 @@ export function NetworkMap({ events, clubs }: { events: Event[]; clubs: Club[] }
         )}
       </aside>
 
-      <div className={`relative order-1 h-[52dvh] min-w-0 bg-sand lg:order-2 lg:block lg:h-auto lg:flex-1 ${signedOut ? "hidden" : ""}`}>
+      <div className={`relative order-1 h-[60dvh] min-w-0 bg-sand lg:order-2 lg:block lg:h-auto lg:flex-1 ${signedOut ? "hidden" : ""}`}>
         <div ref={el} className="h-full w-full" />
         <label className="absolute left-3 top-3 z-10 flex cursor-pointer items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-xs font-semibold text-ink shadow">
           <input type="checkbox" checked={seeAll} onChange={(e) => setSeeAll(e.target.checked)} className="h-4 w-4 accent-[#c17f4a]" />
