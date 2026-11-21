@@ -130,7 +130,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
   }, []);
 
   return (
-    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} cycleMs={10_000} onReplay={play}>
+    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} cycleMs={10_000} onReplay={play} replayClassName="left-36">
       <div ref={el} className="h-full w-full" />
     </HeroOverlay>
   );
