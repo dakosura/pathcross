@@ -9,6 +9,7 @@ import { AddToCalendar } from "./AddToCalendar";
 import { DateBlock } from "./DateBlock";
 import { MatchBadge } from "./EventRating";
 import { GoingButton } from "./GoingButton";
+import { SaveButton } from "./SaveButton";
 import { SignupLink } from "./SignupLink";
 import { Stars } from "./Stars";
 
@@ -37,6 +38,7 @@ function Item({ row, tone = "plain" }: { row: Row | NonNullable<ReturnType<typeo
           {rating.reasons[0] && <p className="mt-2 text-sm text-bark"><span aria-hidden="true" className="text-moss">✓ </span>{rating.reasons[0]}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
             <GoingButton id={ev.id} />
+            <SaveButton kind="events" id={ev.id} />
             <AddToCalendar event={ev} />
             <SignupLink event={ev} />
           </div>

@@ -5,6 +5,7 @@ import { PersonalFeatured } from "@/components/PersonalFeatured";
 import { ThisWeek } from "@/components/ThisWeek";
 import { DateBlock } from "@/components/DateBlock";
 import { InterestIcon } from "@/components/InterestIcon";
+import { SaveButton } from "@/components/SaveButton";
 import { SignupLink } from "@/components/SignupLink";
 import { clubs, clubsByInterest } from "@/lib/clubs";
 import { getCalendarEvents, getEvents, getFeaturedEvents, getToday } from "@/lib/data";
@@ -123,7 +124,7 @@ export default async function Home() {
                   <Link href={`/events/${ev.id}`} className="block truncate font-display text-lg font-semibold text-ink after:absolute after:inset-0 group-hover:text-clay-700">{ev.title}</Link>
                   <p className="truncate text-sm text-bark">{formatRange(ev.start_time, ev.end_time)} · {ev.online ? "Online" : ev.location.venue}</p>
                 </div>
-                <div className="hidden shrink-0 sm:block"><SignupLink event={ev} /></div>
+                <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-4"><SaveButton kind="events" id={ev.id} /><span className="hidden sm:block"><SignupLink event={ev} /></span></div>
               </li>
             ))}
           </ol>

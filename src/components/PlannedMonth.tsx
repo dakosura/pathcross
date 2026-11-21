@@ -16,7 +16,10 @@ export function PlannedMonth({ events, today }: { events: Event[]; today: string
 
   return (
     <section aria-label="Planned this month" className="px-3 pb-2">
-      <h2 className="px-2 pb-2 pt-1 font-sans text-[11px] font-bold uppercase tracking-widest text-bark/70">Planned in {MONTHS[Number(month.slice(5)) - 1]}</h2>
+      <div className="flex items-baseline justify-between gap-3 px-2 pb-2 pt-1">
+        <h2 className="font-sans text-[11px] font-bold uppercase tracking-widest text-bark/70">Planned in {MONTHS[Number(month.slice(5)) - 1]}</h2>
+        <Link href="/calendar#mine" className="text-xs font-semibold text-clay-700 hover:underline">Open my calendar →</Link>
+      </div>
       {mine.length === 0 ? (
         <p className="rounded-xl bg-sand px-4 py-4 text-sm text-bark">Nothing planned yet this month. Add events from the Events tab, or tap <strong>I&apos;m going</strong> on any event.</p>
       ) : (

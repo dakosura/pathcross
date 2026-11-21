@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { PageHeader } from "@/components/PageHeader";
+import { SaveButton } from "@/components/SaveButton";
 import { getWeeklySeries } from "@/lib/data";
 import { formatDate, formatRange } from "@/lib/format";
 
@@ -41,6 +42,7 @@ export default async function WeeklyPage() {
                       <CategoryBadge category={s.category} />
                       {(s.weeks || (s.days && s.days.length > 1)) && <span className="text-xs font-medium text-bark">{event.recurrence}</span>}
                     </div>
+                    <div className="mt-3"><SaveButton kind="events" id={s.id} /></div>
                   </div>
                 </li>
               ))}
@@ -59,6 +61,7 @@ export default async function WeeklyPage() {
                     <Link href={`/events/${s.id}`} className="font-display text-lg font-semibold leading-snug text-ink after:absolute after:inset-0 group-hover:text-clay-700">{s.title}</Link>
                     <p className="mt-0.5 text-sm text-bark">{event.location.venue}</p>
                     <div className="mt-2"><CategoryBadge category={s.category} /></div>
+                    <div className="mt-3"><SaveButton kind="events" id={s.id} /></div>
                   </div>
                 </li>
               ))}

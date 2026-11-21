@@ -51,7 +51,7 @@ const nowMinutes = () => {
  * A full-screen view of one day: an hour-by-hour timeline of everything on the
  * calendar, with the details and sign-up links for each event beside it.
  */
-export function DayView({ date, events, today, onClose, onMove, onHide }: { date: string; events: Event[]; today: string; onClose: () => void; onMove: (delta: number) => void; onHide: (seriesId: string) => void }) {
+export function DayView({ date, events, today, onClose, onMove, onHide, canHide = true }: { date: string; events: Event[]; today: string; onClose: () => void; onMove: (delta: number) => void; onHide: (seriesId: string) => void; canHide?: boolean }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [now] = useState(nowMinutes);
 
@@ -155,7 +155,7 @@ export function DayView({ date, events, today, onClose, onMove, onHide }: { date
                       <SaveButton kind="events" id={e.id} />
                       <SignupLink event={e} />
                     </div>
-                    {e.series_id && (
+                    {canHide && e.series_id && (
                       <button type="button" onClick={() => onHide(e.series_id!)} className="mt-3 text-xs font-semibold text-bark underline-offset-2 hover:text-clay-700 hover:underline">
                         Hide this from my calendar
                       </button>

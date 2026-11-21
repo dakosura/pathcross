@@ -34,14 +34,9 @@ const fold = (line: string) => {
   return parts.join("\r\n ");
 };
 
-/** The text of an .ics file that Apple Calendar, Outlook and Google Calendar can all import. */
-export function icsFile(ev: Event): string {
+function vevent(ev: Event): string[] {
   const [s, e] = span(ev);
   return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//PathCross//Events//EN",
-    "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${ev.id}@joinpathcross.com`,
     `DTSTAMP:${stamp(new Date())}`,
@@ -52,6 +47,28 @@ export function icsFile(ev: Event): string {
     `DESCRIPTION:${esc(notes(ev))}`,
     `URL:${eventUrl(ev)}`,
     "END:VEVENT",
-    "END:VCALENDAR",
-  ].map(fold).join("\r\n") + "\r\n";
+  ];
+}
+
+function calendar(events: Event[]): string {
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PathCross//Events//EN", "CALSCALE:GREGORIAN", ...events.flatMap(vevent), "END:VCALENDAR"];
+  return lines.map(fold).join("\r\n") + "\r\n";
+}
+
+/** The text of an .ics file that Apple Calendar, Outlook and Google Calendar can all import. */
+export const icsFile = (ev: Event) => calendar([ev]);
+
+/** One .ics file holding several events, e.g. everything on a person's My Calendar. */
+export const icsFileMany = (events: Event[]) => calendar(events);
+
+/** Saves text as an .ics file through the browser. */
+export function downloadIcs(filename: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/calendar;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
