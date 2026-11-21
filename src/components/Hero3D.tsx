@@ -29,8 +29,10 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
   const timer = useRef<number>(0);
   const safety = useRef<number>(0);
   const [arrived, setArrived] = useState(false);
+  const [explore, setExplore] = useState(false);
   const [ready, setReady] = useState(false);
   const target = events.find((e) => e.id === tourId && e.lat && e.lng)!;
+  const [selected, setSelected] = useState<Event>(target);
 
   const play = useCallback(() => {
     const map = mapRef.current;
@@ -39,25 +41,40 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
     window.clearTimeout(safety.current);
     map.stopCameraAnimation?.();
     setArrived(false);
+    setExplore(false);
+    setSelected(target);
     const end = {
       center: { lat: target.lat!, lng: target.lng!, altitude: 20 },
       range: 520, tilt: 65, heading: -25,
     };
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // After a pause on the event, pull back over Honolulu so the picks can be clicked.
+    const lats = events.map((e) => e.lat!), lngs = events.map((e) => e.lng!);
+    const spanM = Math.max(Math.max(...lats) - Math.min(...lats), (Math.max(...lngs) - Math.min(...lngs)) * 0.93) * 111_000;
+    const overview = {
+      center: { lat: (Math.max(...lats) + Math.min(...lats)) / 2, lng: (Math.max(...lngs) + Math.min(...lngs)) / 2, altitude: 0 },
+      range: Math.max(14_000, spanM * 2.2 + 6_000), tilt: 35, heading: 0,
+    };
+    const settle = (durationMillis: number) => { setExplore(true); map.flyCameraTo({ endCamera: overview, durationMillis }); };
     if (reduce) {
-      Object.assign(map, end);
+      Object.assign(map, overview);
       setArrived(true);
+      setExplore(true);
       return;
     }
     Object.assign(map, START);
     // One continuous flight: no stops between Oahu, Honolulu and the venue.
     timer.current = window.setTimeout(() => {
-      map.addEventListener("gmp-animationend", () => setArrived(true), { once: true });
+      map.addEventListener("gmp-animationend", () => {
+        window.clearTimeout(safety.current);
+        setArrived(true);
+        timer.current = window.setTimeout(() => settle(4500), 4500);
+      }, { once: true });
       map.flyCameraTo({ endCamera: end, durationMillis: 13000 });
     }, 700);
     // safety net if the animation event never fires
-    safety.current = window.setTimeout(() => setArrived(true), 19000);
-  }, [target]);
+    safety.current = window.setTimeout(() => { setArrived(true); settle(4500); }, 19000);
+  }, [target, events]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +82,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
     (async () => {
       try {
         await loadGoogle(apiKey);
-        const { Map3DElement, Marker3DElement } = await (window as any).google.maps.importLibrary("maps3d");
+        const { Map3DElement, Marker3DElement, Marker3DInteractiveElement } = await (window as any).google.maps.importLibrary("maps3d");
         if (cancelled || !el.current) return;
         const map = new Map3DElement({ ...START, mode: "HYBRID" });
         (map as HTMLElement).style.cssText = "width:100%;height:100%;display:block";
@@ -74,12 +91,15 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
         for (const e of events) {
           if (!e.lat || !e.lng) continue;
           try {
-            const m = new Marker3DElement({
+            // The interactive marker can be clicked; fall back to the plain one if this Maps build lacks it.
+            const Pin = Marker3DInteractiveElement ?? Marker3DElement;
+            const m = new Pin({
               position: { lat: e.lat, lng: e.lng, altitude: 30 },
               altitudeMode: "RELATIVE_TO_GROUND",
               extruded: true,
               label: e.id === tourId ? "★" : "",
             });
+            m.addEventListener("gmp-click", () => { setSelected(e); setArrived(true); });
             map.append(m);
           } catch {}
         }
@@ -101,7 +121,7 @@ export function Hero3D({ events, tourId, apiKey, onFail }: { events: Event[]; to
   }, []);
 
   return (
-    <HeroOverlay target={target} arrived={arrived} ready={ready} onReplay={play}>
+    <HeroOverlay target={selected} arrived={arrived} ready={ready} explore={explore} onReplay={play}>
       <div ref={el} className="h-full w-full" />
     </HeroOverlay>
   );
