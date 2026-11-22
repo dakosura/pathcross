@@ -264,4 +264,14 @@ export const series: Series[] = [
     venue: "Kapiʻolani Regional Park", address: "3840 Paki Ave., Honolulu, HI 96815", lat: 21.26607, lng: -157.81686,
     start: "15:30", end: "19:00", days: [3, 6], label: "Wednesdays and Saturdays",
   },
+
+  // ------------------------------------------------------------------ Business networking
+  {
+    id: "hbn-weekly-meeting", title: "Honolulu Business Network Weekly Meeting", category: "General Professional", club_id: "honolulu-business-network",
+    description: "A weekly business community built on trust and mutual referrals: one hour every Thursday of warm introductions and structured conversations, with no pitching. Visit once as a guest for free. The group offers one seat per business category, so check yours when you reserve. Bring business cards and a one-line introduction.",
+    organizer: "Honolulu Business Network", source_url: "https://www.honolulubusinessnetwork.com/", registration_url: "https://www.honolulubusinessnetwork.com/", price: "Free for first-time guests",
+    note: "Meets in Honolulu and online. Reserve a guest seat on the organizer's site and the meeting details are sent to you.",
+    venue: "Honolulu and online", city: "Honolulu",
+    start: "12:30", end: "13:30", days: [4],
+  },
 ];
