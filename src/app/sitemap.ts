@@ -16,6 +16,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page("/calendar", "daily", 0.7),
     page("/clubs", "weekly", 0.8),
     page("/about", "monthly", 0.5),
+    page("/submit", "monthly", 0.5),
+    page("/faq", "monthly", 0.5),
+    page("/contact", "monthly", 0.4),
     ...interests.map((i) => page(`/clubs/${i.id}`, "weekly", 0.7)),
     ...clubs.filter((c) => !c.pending).map((c) => page(`/clubs/${c.interest}/${c.id}`, "monthly", 0.6)),
     // Repeating events live on /weekly; their own pages change date every week.

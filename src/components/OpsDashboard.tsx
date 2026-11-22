@@ -19,6 +19,7 @@ export interface Stats {
     saved_total: number;
     saved_top: { kind: string; id: string; label: string; saves: number }[];
   };
+  submissions: { total: number; error?: string; recent: Record<string, string | null>[] };
   accounts: { total: number; last7: number; last30: number; daily: { day: string; count: number }[]; professions: Named[]; goals: Named[]; recent: { email: string; created_at: string }[] };
 }
 type Problem = null | { kind: "signed-out" | "not-admin" | "not-configured" | "server"; email?: string; message?: string };
@@ -207,6 +208,36 @@ export function Report({ stats }: { stats: Stats }) {
               <BarList rows={(a?.goals ?? []).map((g) => ({ label: g.name, value: g.visitors }))} empty="No one has chosen goals yet." />
             </Panel>
           </div>
+
+          <Panel title={`Listing requests (${fmt(stats.submissions?.total ?? 0)})`} hint="Clubs, events and networks people sent through the List your event form. Newest first. Private: only you can see this.">
+            {stats.submissions?.error ? (
+              <p className="text-sm text-clay-700">The requests table isn&apos;t set up yet ({stats.submissions.error}).</p>
+            ) : (stats.submissions?.recent?.length ?? 0) === 0 ? (
+              <p className="text-sm text-bark">No requests yet.</p>
+            ) : (
+              <ul className="divide-y divide-line text-sm">
+                {stats.submissions.recent.map((r) => (
+                  <li key={r.id ?? r.created_at} className="space-y-1 py-4">
+                    <p className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="font-semibold text-ink">{r.name} <span className="font-normal text-bark">· {r.kind} · {r.organizer}</span></span>
+                      <span className="text-xs text-bark">{r.created_at ? new Date(r.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "Pacific/Honolulu" }) : ""}</span>
+                    </p>
+                    <p className="text-bark">{r.description}</p>
+                    <p className="text-xs text-bark">
+                      {[r.event_date, r.start_time && `${r.start_time}${r.end_time ? `–${r.end_time}` : ""}`, r.repeats, r.venue, r.address, r.price].filter(Boolean).join(" · ")}
+                    </p>
+                    <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                      {r.website && <a href={r.website} target="_blank" rel="noopener noreferrer" className="font-semibold text-clay-700 hover:underline">Website ↗</a>}
+                      {r.social && <a href={r.social} target="_blank" rel="noopener noreferrer" className="font-semibold text-clay-700 hover:underline">Social ↗</a>}
+                      <a href={`mailto:${r.contact_email}?subject=${encodeURIComponent(`Your PathCross listing: ${r.name}`)}`} className="font-semibold text-clay-700 hover:underline">Reply to {r.contact_name} ({r.contact_email})</a>
+                      {r.contact_phone && <span className="text-bark">{r.contact_phone}</span>}
+                    </p>
+                    {(r.join_info || r.extra) && <p className="text-xs text-bark">{[r.join_info, r.extra].filter(Boolean).join(" · ")}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
 
           <Panel title="Recent sign-ups" hint={`Free accounts, newest first. Showing ${a?.recent?.length ?? 0} of ${fmt(a?.total ?? 0)}. Private: only you can see this.`}>
             {(a?.recent?.length ?? 0) === 0 ? (
