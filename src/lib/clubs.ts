@@ -773,6 +773,16 @@ export const clubs: Club[] = [
 
   // --- Investing, crypto and startup capital (Professional) ---
   {
+    id: "honolulu-business-network",
+    name: "Honolulu Business Network",
+    interest: "professional",
+    blurb: "A weekly business networking group built on trust and mutual referrals: one hour every Thursday, 12:30 to 1:30 PM, in Honolulu and online. Structured conversations and warm introductions rather than pitching. Open to founders, consultants, creatives, real estate, home services, wellness and other local business owners.",
+    url: "https://www.honolulubusinessnetwork.com/",
+    area: "Honolulu + online",
+    membership: "Visit a meeting as a guest for free: reserve a guest seat on the website and meeting details are sent right away. Bring business cards and a one-line introduction. The group offers one seat per business category, so check your category before joining. Questions: aloha@honolulubusinessnetwork.com. Membership terms are on its site.",
+    facilities: ["Weekly Thursday meeting", "Free guest visit", "One seat per business category", "Online option", "Referral-focused"],
+  },
+  {
     id: "blockchain-in-paradise",
     name: "Blockchain in Paradise",
     interest: "professional",
