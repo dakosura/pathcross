@@ -27,14 +27,14 @@ export const metadata: Metadata = {
     description: site.description,
     images: [{ url: "/brand/og.jpg", width: 1200, height: 630, alt: "PathCross" }],
   },
-  twitter: { card: "summary_large_image", title: "PathCross: Efficient Networking for Business Professionals in Honolulu", description: site.description, images: ["/brand/og.jpg"] },
+  twitter: { card: "summary_large_image", site: "@JoinPathCross", creator: "@JoinPathCross", title: "PathCross: Efficient Networking for Business Professionals in Honolulu", description: site.description, images: ["/brand/og.jpg"] },
 };
 
 // Tells search engines who runs the site and what it is.
 const siteJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Organization", "@id": `${site.url}/#org`, name: site.name, url: site.url, logo: `${site.url}/brand/mark.png`, email: site.contactEmail, areaServed: "Honolulu, Hawaii" },
+    { "@type": "Organization", "@id": `${site.url}/#org`, name: site.name, url: site.url, logo: `${site.url}/brand/mark.png`, email: site.contactEmail, areaServed: "Honolulu, Hawaii", sameAs: site.social.map((s) => s.url) },
     { "@type": "WebSite", "@id": `${site.url}/#site`, name: site.name, url: site.url, description: site.description, publisher: { "@id": `${site.url}/#org` }, inLanguage: "en-US" },
   ],
 };
