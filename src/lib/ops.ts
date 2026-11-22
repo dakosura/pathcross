@@ -15,6 +15,8 @@ export interface OpsStats {
   traffic: Record<string, unknown> | null;
   /** Set when the analytics table or function is missing */
   trafficError?: string;
+  /** Listing requests from /submit, for the site owner only. */
+  submissions: { total: number; error?: string; recent: Record<string, string | null>[] };
   accounts: {
     total: number;
     last7: number;
@@ -63,6 +65,9 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
     }
   }
 
+  // Listing requests (supabase/migrations/..._listing_submissions.sql). Missing table is reported, not fatal.
+  const subs = await db.from("listing_submissions").select("id,created_at,status,kind,name,organizer,interest,description,event_date,start_time,end_time,repeats,venue,address,price,website,social,join_info,extra,contact_name,contact_email,contact_phone", { count: "exact" }).order("created_at", { ascending: false }).limit(25);
+
   // Accounts: counted from the sign-in system. Emails are shown only to the admin, on /ops.
   const users: { email: string; created_at: string; user_metadata: Record<string, unknown> | null }[] = [];
   for (let page = 1; page <= 5; page++) {
@@ -82,6 +87,7 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
     generatedAt: new Date().toISOString(),
     traffic,
     trafficError,
+    submissions: { total: subs.count ?? 0, error: subs.error?.message, recent: (subs.data ?? []) as Record<string, string | null>[] },
     accounts: {
       total: users.length,
       last7: users.filter((u) => ageDays(u) <= 7).length,

@@ -8,6 +8,8 @@ export const site = {
   description:
     "Your one-stop shop for building a professional network in Honolulu, Hawaiʻi. Find networking events, business clubs and groups in one place, matched to what you do. Free.",
   contactEmail: "hello@joinpathcross.com",
+  /** Where support and listing questions go. The same inbox for now. */
+  supportEmail: "hello@joinpathcross.com",
   /** Official social accounts: shown in the footer and listed for search engines. */
   social: [
     { id: "facebook", name: "Facebook", handle: "PathCross", url: "https://www.facebook.com/profile.php?id=61596821220456" },

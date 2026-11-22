@@ -113,6 +113,20 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
+        <div className="grid items-center gap-4 rounded-2xl border border-line bg-card p-6 sm:p-8 md:grid-cols-[1fr_auto]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-clay-700">For organizers</p>
+            <h2 className="mt-2 text-xl font-semibold sm:text-2xl">Run a club, network or event in Honolulu?</h2>
+            <p className="mt-1 max-w-2xl text-sm text-bark sm:text-base">Tell us about it and reach people looking for their next room. It takes a few minutes.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/submit" className="rounded-full bg-clay px-6 py-3 text-center font-semibold text-white transition hover:bg-clay-700">List yours</Link>
+            <Link href="/faq" className="rounded-full px-6 py-3 text-center font-semibold text-forest ring-1 ring-forest/25 transition hover:bg-moss-50">FAQ</Link>
+          </div>
+        </div>
+      </section>
+
       {next.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <SectionHeading title="Coming up next" subtitle="The next few dates on the calendar." href="/calendar" cta="Open the calendar" />
