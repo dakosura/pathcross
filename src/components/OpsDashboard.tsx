@@ -125,7 +125,7 @@ function SignIn() {
           // On success the page picks up the new session by itself.
           const { error: err } = (await supabase?.auth.signInWithPassword({ email: email.trim(), password })) ?? { error: { message: "not-set-up", status: 0 } };
           if (err) {
-            setError(err.status === 429 ? "Too many attempts. Please wait a few minutes and try again." : "That email and password didn't work. If you haven't set a password yet, use the email link below.");
+            setError(err.status === 429 ? "Too many attempts. Please wait a few minutes and try again." : "That email and password didn't work. No password yet? Tap “Email me a sign-in link instead”, then choose “Set a password” once you're in.");
             setPhase("idle");
           }
         }}
@@ -152,6 +152,45 @@ function SignIn() {
       {error && <p role="alert" className="text-sm font-medium text-clay-700">{error}</p>}
       <button type="submit" disabled={phase === "sending"} className="w-full rounded-full bg-forest px-4 py-3 text-sm font-semibold text-cream hover:bg-forest-700 disabled:opacity-60">{phase === "sending" ? "Sending…" : "Email me a sign-in link"}</button>
       <button type="button" onClick={() => { setUsePassword(true); setError(null); setPhase("idle"); }} className="w-full text-center text-sm font-semibold text-clay-700 hover:underline">Use a password instead</button>
+    </form>
+  );
+}
+
+/** Lets a signed-in admin create or change their password (used by the password sign-in). */
+function SetPassword() {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [phase, setPhase] = useState<"idle" | "saving" | "done">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  if (!open) {
+    return <button onClick={() => { setOpen(true); setPhase("idle"); setPassword(""); }} className="text-sm font-semibold text-clay-700 hover:underline">Set a password</button>;
+  }
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError(null);
+        setPhase("saving");
+        const { error: err } = (await supabase?.auth.updateUser({ password })) ?? { error: { message: "Sign-in isn't set up here." } };
+        if (err) { setError(err.message); setPhase("idle"); } else setPhase("done");
+      }}
+      className="flex flex-wrap items-center gap-2"
+    >
+      {phase === "done" ? (
+        <>
+          <span role="status" className="text-sm font-medium text-forest">Password saved. Use it next time you sign in.</span>
+          <button type="button" onClick={() => setOpen(false)} className="text-sm font-semibold text-clay-700 hover:underline">Close</button>
+        </>
+      ) : (
+        <>
+          <label htmlFor="ops-new-password" className="sr-only">New password</label>
+          <input id="ops-new-password" type="password" required minLength={8} autoComplete="new-password" autoFocus placeholder="New password (8+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} className="rounded-full border border-line bg-white px-4 py-1.5 text-sm outline-none focus:border-moss" />
+          <button type="submit" disabled={phase === "saving"} className="rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream hover:bg-forest-700 disabled:opacity-60">{phase === "saving" ? "Saving…" : "Save"}</button>
+          <button type="button" onClick={() => setOpen(false)} className="text-sm font-semibold text-bark hover:underline">Cancel</button>
+          {error && <p role="alert" className="w-full text-sm font-medium text-clay-700">{error}</p>}
+        </>
+      )}
     </form>
   );
 }
@@ -350,6 +389,7 @@ export function OpsDashboard() {
             <input type="checkbox" checked={ignoreMe} onChange={(e) => { setIgnored(e.target.checked); setIgnoreMe(e.target.checked); }} className="h-4 w-4 accent-[#c17f4a]" />
             Don&apos;t count my visits here
           </label>
+          <SetPassword />
           <button onClick={() => void supabase?.auth.signOut()} className="text-sm font-semibold text-clay-700 hover:underline">Sign out{email ? ` (${email})` : ""}</button>
         </div>
       </div>
