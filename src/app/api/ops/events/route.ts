@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       source_url: d.source_url, registration_url: d.registration_url || null, price: d.price || null, category: d.category,
     });
     if (error) throw error;
-    revalidateTag("events", "max");
+    revalidateTag("events", { expire: 0 }); // show the new event on the very next page load
     return json({ ok: true, id });
   } catch (err) {
     return json({ error: "server", message: err instanceof Error ? err.message : "Something went wrong." }, 500);
