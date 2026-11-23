@@ -103,3 +103,15 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
     },
   };
 }
+
+/** Checks the Supabase access token on a request and that its email is an admin. Returns the email, or a ready-made error response. */
+export async function requireAdmin(request: Request): Promise<{ email: string } | { error: Response }> {
+  const fail = (body: unknown, status: number) => ({ error: Response.json(body, { status, headers: { "Cache-Control": "no-store" } }) });
+  const token = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  if (!token) return fail({ error: "signed-out" }, 401);
+  const { data, error } = await adminClient().auth.getUser(token);
+  const email = data.user?.email?.toLowerCase();
+  if (error || !email || !data.user?.email_confirmed_at) return fail({ error: "signed-out" }, 401);
+  if (!adminEmails().includes(email)) return fail({ error: "not-admin" }, 403);
+  return { email };
+}
