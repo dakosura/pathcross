@@ -72,9 +72,12 @@ function toEvent(p: Record<string, Prop>, o: IcsOptions): IngestedEvent | null {
   const start = toHonolulu(p.DTSTART);
   if (!start) return null;
   const end = p.DTEND ? toHonolulu(p.DTEND) : null;
-  const url = p.URL?.value ?? "";
+  // Luma feeds have no URL line; their description starts "Get up-to-date information at: <event page>".
+  const url = p.URL?.value ?? unescapeText(p.DESCRIPTION?.value ?? "").match(/https:\/\/(?:luma\.com|lu\.ma)\/[^\s)]+/)?.[0] ?? "";
   if (!url) return null;
-  const location = p.LOCATION ? unescapeText(p.LOCATION.value) : "";
+  const rawLocation = p.LOCATION ? unescapeText(p.LOCATION.value) : "";
+  // Online Luma events put the event page in LOCATION; that is not a venue.
+  const location = /^https?:\/\//i.test(rawLocation) ? "Online" : rawLocation;
   const [venue, ...rest] = location.split(",").map((s) => s.trim()).filter(Boolean);
   const uid = p.UID.value;
   return {
