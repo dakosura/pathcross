@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { isIgnored, setIgnored } from "@/lib/ignore-me";
 import { sendSignInLink } from "@/lib/network";
 import { supabase } from "@/lib/supabase";
+import { QuickAddEvent } from "./QuickAddEvent";
 
 interface Named { name: string; visitors: number }
 export interface Stats {
@@ -355,6 +356,8 @@ export function OpsDashboard() {
 
       {problem?.kind === "server" && <p role="alert" className="mt-6 rounded-xl bg-clay-50 px-4 py-3 text-sm font-medium text-clay-700">Something went wrong loading the numbers{problem.message ? `: ${problem.message}` : ""}.</p>}
       {!stats && !problem && <div className="mt-8 h-64 animate-pulse rounded-2xl bg-sand" />}
+
+      <QuickAddEvent token={token} />
 
       {stats && <Report stats={stats} />}
     </>,
