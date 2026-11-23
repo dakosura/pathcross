@@ -10,7 +10,7 @@ export default async function CalendarPage() {
   return (
     <>
       <PageHeader eyebrow="Oʻahu · Month by month" title="Event calendar">
-        The Full calendar shows every upcoming event, including weekly markets, run clubs and volunteer shifts. My calendar fills itself from My Network: add an event or a club and it appears there.
+        The Full calendar shows every upcoming event, including weekly run clubs and volunteer shifts. My calendar fills itself from My Network: add an event or a club and it appears there.
       </PageHeader>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <CalendarSwitcher events={events} today={today} categories={categories} />
