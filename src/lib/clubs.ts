@@ -1,4 +1,6 @@
 import type { Club } from "@/types";
+import { describe } from "./recurring";
+import { marketSeries } from "./weekly-events";
 
 /**
  * The Clubs & Programs directory. Only publicly available information, taken
@@ -17,7 +19,7 @@ const CHECKED = "2026-11-16";
 /** Entries added on a later day. */
 const NEW_CHECKED = "2026-11-17";
 
-export const clubs: Club[] = [
+const baseClubs: Club[] = [
   {
     id: "chamber-hawaii",
     name: "Chamber of Commerce Hawaii",
@@ -346,7 +348,7 @@ export const clubs: Club[] = [
     id: "waialae-country-club",
     name: "Waialae Country Club",
     interest: "golf",
-    blurb: "A private, nonprofit country club in Kāhala. Its Seth Raynor course opened in 1927. Recognized as a Platinum Club of America.",
+    blurb: "A private, nonprofit country club in Kāhala. Its Seth Raynor course opened in 1927. Recognized as a Platinum Club of America. Hosts the Sony Championship Hawaiʻi (PGA Tour Champions) on January 11 to 16, 2027, with public tickets.",
     url: "https://www.waialaecc.com",
     area: "Kāhala",
     address: "4997 Kāhala Ave., Honolulu, HI 96816",
@@ -1094,7 +1096,120 @@ export const clubs: Club[] = [
     area: "Island-wide",
     pending: true,
   },
+  // ---------------------------------------------------------------- Yoga studios (checked 2026-11-22)
+  {
+    id: "corepower-yoga-ward",
+    name: "CorePower Yoga Ward",
+    interest: "fitness",
+    blurb: "A national chain's studio in Ward Village with heated and unheated classes, including Power Yoga and Yin. Free parking in the Ward Village lot.",
+    url: "https://www.corepoweryoga.com/yoga-studios/hi/honolulu/ward",
+    area: "Kakaʻako",
+    address: "1170 Auahi St., Suite 180, Honolulu, HI 96814",
+    lat: 21.29329,
+    lng: -157.85066,
+    phone: "833-448-2561",
+    membership: "New students get a free week of unlimited classes with no credit card. CorePower says membership and class-pack prices vary by studio and does not list Hawaiʻi rates on its public pages. As of 2026-11-22 a Black Friday offer showed All Access at $156.75 a month for the first 12 months, then $209 a month.",
+    facilities: ["Heated rooms", "Showers", "Lockers", "Mat and towel rentals"],
+  },
+  {
+    id: "corepower-yoga-kahala",
+    name: "CorePower Yoga Kahala",
+    interest: "fitness",
+    blurb: "CorePower's studio on Waialae Avenue in Kāhala, with heated and unheated yoga classes. The chain also has studios in Kailua and Kapolei.",
+    url: "https://www.corepoweryoga.com/yoga-studios/hi/honolulu/kahala",
+    area: "Kāhala",
+    address: "4211 Waialae Ave., Suite B-11, Honolulu, HI 96816",
+    lat: 21.27654,
+    lng: -157.78628,
+    phone: "833-448-2561",
+    membership: "New students get a free week of unlimited classes with no credit card. Membership prices vary by studio and are not posted publicly; see the studio page for current offers.",
+  },
+  {
+    id: "yoga-room-hawaii",
+    name: "Yoga Room Hawaii",
+    interest: "fitness",
+    blurb: "A Mōʻiliʻili studio with in-person, live-stream and on-demand classes, workshops and teacher training.",
+    url: "https://www.yogaroomhawaii.com",
+    area: "Mōʻiliʻili",
+    address: "1120 12th Ave., 2nd Floor, Honolulu, HI 96816",
+    lat: 21.2816,
+    lng: -157.79957,
+    membership: "Hawaiʻi residents get a two-week unlimited trial for $39 (local or school ID required). Visitors can buy a one-week unlimited pass. Discounted membership is $149 a month for full-time teachers and students, seniors 55+ and military, bought in the studio.",
+    pricing: [
+      { label: "Full membership", amount: "$179 / month", note: "Unlimited in-studio and live-stream classes plus the on-demand library" },
+      { label: "Online-only membership", amount: "$89 / month" },
+      { label: "10-class package", amount: "$290" },
+      { label: "5-class package", amount: "$150" },
+      { label: "Traveler's week (non-residents)", amount: "$69" },
+    ],
+    pricing_as_of: "2026-11-22",
+    pricing_source: "https://www.yogaroomhawaii.com/pricing",
+    facilities: ["Workshops and events", "Teacher training", "Live stream", "On-demand library"],
+  },
+  {
+    id: "hot-yoga-waikiki",
+    name: "Hot Yoga Waikiki",
+    interest: "fitness",
+    blurb: "An infrared-heated studio near the Honolulu Zoo offering 90-minute Original Hot Yoga (Bikram method) and 60-minute Inferno Hot Pilates. Its sister studio, HYPE, is in Ewa Beach.",
+    url: "https://www.hotyogawaikiki.com",
+    area: "Waikīkī",
+    address: "449 Kapahulu Ave., Suite 208, Honolulu, HI 96816",
+    lat: 21.27498,
+    lng: -157.81536,
+    membership: "Check in and book online before you arrive. Prices below exclude tax and are non-refundable.",
+    pricing: [
+      { label: "Single class", amount: "$20" },
+      { label: "Unlimited week", amount: "$75", note: "7 consecutive days, includes a rental mat" },
+      { label: "Unlimited month", amount: "$150", note: "One-time charge" },
+      { label: "10-class card", amount: "$180" },
+      { label: "20-class card", amount: "$320" },
+    ],
+    pricing_as_of: "2026-11-22",
+    pricing_source: "https://www.hotyogawaikiki.com",
+    facilities: ["Infrared heat", "Mat and towel rentals"],
+  },
+  {
+    id: "hotyoga8-kaimuki",
+    name: "HotYoga8",
+    interest: "fitness",
+    blurb: "A Kaimukī studio for Original Hot Yoga (Bikram) and Pilates. All classes are open to beginners, and it runs a 14-day challenge for new students.",
+    url: "https://www.hotyoga8.com",
+    area: "Kaimukī",
+    address: "1123 11th Ave., Suite 201, Honolulu, HI 96816",
+    lat: 21.28213,
+    lng: -157.80041,
+    membership: "New students can start with the 14-day challenge (a minimum of 6 to 7 classes in 14 days, as the site words it). Membership prices are not on the public pages we could read.",
+  },
+  {
+    id: "bella-kai-hot-yoga",
+    name: "Bella Kai Hot Yoga",
+    interest: "fitness",
+    blurb: "Kailua's dedicated hot yoga studio, with hot 26+2, barre, yin and kick-box classes plus pop-up events.",
+    url: "https://bellakaihotyoga.com",
+    area: "Kailua",
+    membership: "Has a new student offer; rates are on the studio's Rates & Memberships page.",
+    pending: true,
+  },
 ];
+
+// Farmers and street markets come from the list in weekly-events.ts. They live in the Food & drink
+// directory only; they are not on the calendar, event list or Weekly page.
+const clock = (hhmm: string) => { const [h, m] = hhmm.split(":").map(Number); return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "AM" : "PM"}`; };
+
+const marketClubs: Club[] = marketSeries.map((m) => ({
+  id: m.id,
+  name: m.title,
+  interest: "food",
+  blurb: m.description,
+  url: m.source_url,
+  area: m.city ?? "Honolulu",
+  address: m.address,
+  lat: m.lat,
+  lng: m.lng,
+  membership: `${describe(m)}, ${clock(m.start)}${m.end ? ` to ${clock(m.end)}` : ""} at ${m.venue}. Free to browse; vendors set their own prices. Hours as listed in October 2026, so check the market's own page before a special trip.`,
+}));
+
+export const clubs: Club[] = [...baseClubs, ...marketClubs];
 
 export const clubById = (id?: string) => clubs.find((c) => c.id === id);
 export const clubsByInterest = (interest: string) => clubs.filter((c) => c.interest === interest);
