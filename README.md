@@ -17,7 +17,7 @@ PathCross helps people find networking events, clubs and groups in Honolulu. Eve
 | `/my-network` | Signed-in map and calendar of saved events |
 | `/about` | How it works and how ratings are calculated |
 | `/privacy`, `/terms` | Legal pages (facts live in `src/lib/site.ts`) |
-| `/ops` | Visitor analytics, restricted to `OPS_ADMIN_EMAILS` |
+| `ops.joinpathcross.com` (route `/ops`) | Visitor analytics, restricted to `OPS_ADMIN_EMAILS` |
 
 Other code: components in `src/components`, data and rating logic in `src/lib`, event importers in `src/lib/ingest`, database SQL in `supabase/`.
 

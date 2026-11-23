@@ -143,7 +143,7 @@ function SignIn() {
   if (phase === "sent") return <p role="status" className="rounded-xl bg-moss-50 p-4 text-sm text-forest">Check your email for a sign-in link, and open it on this device. You&apos;ll land back here.</p>;
   return (
     <form
-      onSubmit={async (e) => { e.preventDefault(); setError(null); setPhase("sending"); const problem = await sendSignInLink(email.trim(), "/ops"); if (problem) { setError(problem); setPhase("idle"); } else setPhase("sent"); }}
+      onSubmit={async (e) => { e.preventDefault(); setError(null); setPhase("sending"); const problem = await sendSignInLink(email.trim(), window.location.hostname.startsWith("ops.") ? "/" : "/ops"); if (problem) { setError(problem); setPhase("idle"); } else setPhase("sent"); }}
       className="space-y-3"
     >
       <label htmlFor="ops-email" className="block text-sm font-semibold text-ink">Email</label>
