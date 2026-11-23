@@ -65,7 +65,7 @@ export default async function Home() {
         <div className="grid items-center gap-4 rounded-2xl bg-sand p-6 sm:p-8 md:grid-cols-[1fr_auto]">
           <div>
             <h2 className="text-xl font-semibold sm:text-2xl">Something every week</h2>
-            <p className="mt-1 max-w-2xl text-sm text-bark sm:text-base">Farmers markets, run clubs, volunteer shifts and Friday fireworks, listed by day of the week so there is always somewhere to go.</p>
+            <p className="mt-1 max-w-2xl text-sm text-bark sm:text-base">Run clubs, volunteer shifts and Friday fireworks, listed by day of the week so there is always somewhere to go.</p>
           </div>
           <Link href="/weekly" className="rounded-full bg-forest px-6 py-3 text-center font-semibold text-cream transition hover:bg-forest-700">See the weekly lineup</Link>
         </div>

@@ -18,8 +18,11 @@ const MARKET_NOTE = "Hours as listed in October 2026. Check the market's own pag
 const MARKET_PRICE = "Free to browse; vendors set their own prices";
 const RUN_NOTE = "Listed by Honolulu Magazine in January 2025. Check the club's Instagram for current meeting details.";
 
-export const series: Series[] = [
-  // ------------------------------------------------------------ Farmers markets
+/**
+ * Farmers markets and street markets. Not shown on the calendar, event list or Weekly page
+ * (there were too many of them). Kept here so a Food & Drink section can use them later.
+ */
+export const marketSeries: Series[] = [
   {
     id: "kcc-farmers-market", title: "KCC Farmers Market", category: "Community",
     description: "Oʻahu's best-known farmers market, in the Kapiʻolani Community College parking lot below Diamond Head. Local produce, plants and prepared food. It gets crowded, so arrive early.",
@@ -146,7 +149,9 @@ export const series: Series[] = [
     venue: "Kunia Loa Ridge Farmlands", city: "Kunia", address: "94-1100 Kunia Rd., Kunia, HI 96759",
     start: "09:00", end: "13:00", days: [6], weeks: [1, 3],
   },
+];
 
+export const series: Series[] = [
   // ----------------------------------------------------------------- Other weekly
   {
     id: "waikiki-friday-fireworks", title: "Friday Night Fireworks at Hilton Hawaiian Village", category: "Community",

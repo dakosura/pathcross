@@ -7,8 +7,8 @@ import { getWeeklySeries } from "@/lib/data";
 import { formatDate, formatRange } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Weekly events in Honolulu: farmers markets, run clubs, volunteering",
-  description: "What happens every week on Oʻahu: farmers markets, free run clubs, volunteer shifts and Friday fireworks, listed by day of the week.",
+  title: "Weekly events in Honolulu: run clubs, volunteering, meetups",
+  description: "What happens every week on Oʻahu: free run clubs, volunteer shifts, meetups and Friday fireworks, listed by day of the week.",
 };
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -25,7 +25,7 @@ export default async function WeeklyPage() {
   return (
     <>
       <PageHeader eyebrow="Oʻahu · Every week" title="The weekly lineup">
-        Markets, free run clubs, volunteer shifts and fireworks that come around again and again, so there is always something to join. Each links back to its organizer.
+        Free run clubs, volunteer shifts, meetups and fireworks that come around again and again, so there is always something to join. Each links back to its organizer.
       </PageHeader>
       <div className="mx-auto max-w-4xl space-y-12 px-4 py-12 sm:px-6">
         {byDay.map((d) => (
