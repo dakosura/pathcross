@@ -158,7 +158,7 @@ export const series: Series[] = [
     description: "Sony's January tournament at Waiʻalae Country Club, now the inaugural Sony Championship Hawaiʻi on the PGA Tour Champions (a tour for golfers 50 and over): 78 pros for a $3 million purse, with at least $500,000 going to Hawaiʻi charities. Tournament week runs January 11 to 16, 2027; the Pro-Am is Tuesday and Wednesday. Grounds access is on sale Wednesday through Saturday.",
     organizer: "Sony Championship Hawaiʻi", source_url: "https://www.sonychampionshiphawaii.com/", registration_url: "https://www.sonychampionshiphawaii.com/tickets/",
     price: "Grounds: $30 Wed, $40 Thu-Sat, $100 weekly, $50 good any one day. The Welo Club hospitality: $275 Thu, $290 Fri and Sat. Free: ages 15 and under with a ticketed adult; U.S. military, veterans and dependents.",
-    note: "Gate and tee times were not posted when this was added (tickets went on sale in November 2026); the times shown are placeholders. U.S. military tickets were due to open in early December. Parking is off site with a free shuttle, details to come.",
+    note: "Times shown are approximate; see the tournament site for the daily schedule. U.S. military tickets were due to open in early December. Parking is off site with a free shuttle, details to come.",
     venue: "Waiʻalae Country Club", city: "Honolulu", address: "4997 Kāhala Ave., Honolulu, HI 96816", lat: 21.27454, lng: -157.77076,
     start: "08:00", end: "17:00", dates: ["2027-01-13", "2027-01-14", "2027-01-15", "2027-01-16"], label: "Jan 13 to 16, 2027",
   },
