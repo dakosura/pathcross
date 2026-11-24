@@ -30,6 +30,22 @@ export async function generateMetadata({ params }: PageProps<"/events/[id]">) {
   };
 }
 
+/** Reads a price Google can use from free-form text like "Free" or "YP $15 · Public $40". Returns nothing when unclear. */
+function eventOffer(ev: Event) {
+  const text = ev.price?.trim();
+  if (!text) return undefined;
+  const amounts = [...text.matchAll(/\$\s?(\d+(?:\.\d{1,2})?)/g)].map((m) => Number(m[1]));
+  const price = amounts.length ? Math.min(...amounts) : /\bfree\b/i.test(text) ? 0 : undefined;
+  if (price === undefined) return undefined;
+  return {
+    "@type": "Offer",
+    price,
+    priceCurrency: "USD",
+    url: ev.registration_url ?? ev.source_url,
+    availability: /sold out/i.test(ev.note ?? "") ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+  };
+}
+
 /** schema.org Event data, which lets Google show the date and place in results. */
 function eventJsonLd(ev: Event) {
   // Hawaiʻi has no daylight saving, so the offset is always -10:00.
@@ -47,6 +63,9 @@ function eventJsonLd(ev: Event) {
       ? { "@type": "VirtualLocation", url: ev.registration_url ?? ev.source_url }
       : { "@type": "Place", name: ev.location.venue, address: ev.address ?? `${ev.location.city}, HI` },
     organizer: { "@type": "Organization", name: ev.organizer, url: ev.source_url },
+    performer: { "@type": "Organization", name: ev.organizer },
+    image: [`${site.url}/brand/og.jpg`],
+    offers: eventOffer(ev),
     url: `${site.url}/events/${ev.id}`,
   };
 }
