@@ -1,8 +1,10 @@
 import "server-only";
 import { categoryStyle } from "./categories";
+import { clubs as codeClubs } from "./clubs";
 import { events as realEvents } from "./data";
+import { interests } from "./interests";
 import { adminClient } from "./supabase-admin";
-import type { EventCategory } from "@/types";
+import type { EventCategory, InterestId } from "@/types";
 
 export const CATEGORIES = Object.keys(categoryStyle) as EventCategory[];
 
@@ -107,14 +109,73 @@ const TOOL = {
 };
 
 export type ImageInput = { media_type: string; data: string };
+export type ListingKind = "event" | "group";
+export type ExtractInput = { text?: string; link?: string; image?: ImageInput; kind?: ListingKind };
+export type Extracted = { kind: "event"; draft: DraftEvent } | { kind: "group"; club: DraftClub };
 
-/** Asks Claude to read pasted text, a page, and/or a screenshot and fill in the event fields. */
-export async function extractEvent(input: { text?: string; link?: string; image?: ImageInput }): Promise<DraftEvent> {
+/** What the quick-add form edits for a group or club, and what the server stores. */
+export interface DraftClub {
+  name: string;
+  interest: InterestId;
+  blurb: string;
+  url: string;
+  area: string;
+  address: string;
+  membership: string;
+  phone: string;
+}
+
+const INTERESTS = interests.map((i) => i.id) as InterestId[];
+
+export function cleanClub(raw: unknown): DraftClub {
+  const b = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  return {
+    name: str(b.name, 200),
+    interest: INTERESTS.includes(b.interest as InterestId) ? (b.interest as InterestId) : "professional",
+    blurb: str(b.blurb, 1500),
+    url: url(b.url),
+    area: str(b.area, 120) || "Honolulu",
+    address: str(b.address, 300),
+    membership: str(b.membership, 1500),
+    phone: str(b.phone, 60),
+  };
+}
+
+export function validateClub(d: DraftClub): string | null {
+  if (!d.name) return "Add a name.";
+  if (!d.blurb) return "Add a short description.";
+  if (!d.url) return "Add the group's website or page (starting with https://).";
+  return null;
+}
+
+export const clubId = (d: DraftClub) => `club-${d.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+
+const GROUP_TOOL = {
+  name: "record_group",
+  description: "Record the group, club, program or organization described in the material (not a single dated event). Use an empty string for anything not stated; never guess.",
+  input_schema: {
+    type: "object",
+    properties: {
+      name: { type: "string" },
+      interest: { type: "string", enum: INTERESTS, description: interests.map((i) => `${i.id} = ${i.name}`).join("; ") },
+      blurb: { type: "string", description: "1-3 plain sentences: what the group is and does, using only what the material says" },
+      url: { type: "string", description: "The group's own page or website" },
+      area: { type: "string", description: "Neighborhood or town on Oahu, or Online" },
+      address: { type: "string", description: "Street address if given" },
+      membership: { type: "string", description: "How to join, who can join, cost or meeting schedule if stated" },
+      phone: { type: "string" },
+    },
+    required: ["name", "interest", "blurb"],
+  },
+};
+
+/** Asks Claude to read pasted text, a page, and/or a screenshot and fill in either an event or a group. `kind` forces one; otherwise Claude decides. */
+export async function extractListing(input: ExtractInput): Promise<Extracted> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("ANTHROPIC_API_KEY is not set in Vercel yet.");
 
   const parts: string[] = [];
-  if (input.link) parts.push(`Event link: ${input.link}`);
+  if (input.link) parts.push(`Link: ${input.link}`);
   if (input.link) {
     try { parts.push(`Text found on that page:\n${await pageText(input.link)}`); }
     catch (e) { if (!input.text && !input.image) throw e; }
@@ -123,19 +184,33 @@ export async function extractEvent(input: { text?: string; link?: string; image?
 
   const content: unknown[] = [];
   if (input.image) content.push({ type: "image", source: { type: "base64", media_type: input.image.media_type, data: input.image.data } });
-  content.push({ type: "text", text: `Today is ${hst()} in Honolulu. Extract the one event described below (a flyer, caption or page for a Honolulu-area professional/networking event). Resolve relative dates like "this Friday" from today, and if no year is shown pick the next upcoming date. Times are Hawaii time. Never invent details.\n\n${parts.join("\n\n") || "(see the attached image)"}` });
+  const what = input.kind === "event" ? "the one event" : input.kind === "group" ? "the one group or club" : "either the one event (it has a specific date) or the one group, club or organization (it is an ongoing membership or community, such as a Meetup group page or a club's own site)";
+  content.push({ type: "text", text: `Today is ${hst()} in Honolulu. Extract ${what} described below (a flyer, caption or page for a Honolulu-area professional/networking listing). For an event, resolve relative dates like "this Friday" from today, and if no year is shown pick the next upcoming date. Times are Hawaii time. Never invent details.\n\n${parts.join("\n\n") || "(see the attached image)"}` });
 
+  const tools = input.kind === "event" ? [TOOL] : input.kind === "group" ? [GROUP_TOOL] : [TOOL, GROUP_TOOL];
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: "claude-haiku-5-5", max_tokens: 1500, tools: [TOOL], tool_choice: { type: "tool", name: "record_event" }, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model: "claude-haiku-5-5", max_tokens: 1500, tools, tool_choice: tools.length === 1 ? { type: "tool", name: tools[0].name } : { type: "any" }, messages: [{ role: "user", content }] }),
     signal: AbortSignal.timeout(40_000),
   });
   if (!res.ok) throw new Error(`The AI service answered ${res.status}.`);
-  const out = (await res.json()) as { content?: { type: string; input?: unknown }[] };
-  const draft = cleanDraft(out.content?.find((c) => c.type === "tool_use")?.input);
+  const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown }[] };
+  const call = out.content?.find((c) => c.type === "tool_use");
+  if (call?.name === "record_group") {
+    const club = cleanClub(call.input);
+    if (input.link && !club.url) club.url = url(input.link);
+    return { kind: "group", club };
+  }
+  const draft = cleanDraft(call?.input);
   if (input.link && !draft.source_url) draft.source_url = url(input.link);
-  return draft;
+  return { kind: "event", draft };
+}
+
+/** Kept for callers that only want events. */
+export async function extractEvent(input: Omit<ExtractInput, "kind">): Promise<DraftEvent> {
+  const r = await extractListing({ ...input, kind: "event" });
+  return (r as { kind: "event"; draft: DraftEvent }).draft;
 }
 
 export const eventId = (d: DraftEvent) => `manual-${d.date}-${d.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
@@ -176,6 +251,32 @@ export async function findExisting(links: string[], title?: string, date?: strin
     const { data, error } = await db.from("events").select("id,title,date").eq("status", "active").eq("date", date).ilike("title", title.replace(/[\\%_]/g, "\\$&")).limit(1);
     if (error) throw error;
     if (data?.[0]) return data[0] as ExistingEvent;
+  }
+  return null;
+}
+
+export interface ExistingClub { id: string; name: string }
+
+const nameKey = (n: string) => n.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "");
+
+/** Looks for a group that is already listed: the same website link, or the same name (ignoring case and punctuation). */
+export async function findExistingClub(link: string, name?: string): Promise<ExistingClub | null> {
+  const key = name ? nameKey(name) : "";
+  const curated = codeClubs.find((c) => (link && c.url && sameLink(link, c.url)) || (key && nameKey(c.name) === key));
+  if (curated) return { id: curated.id, name: curated.name };
+
+  const db = adminClient();
+  const variants = link ? linkVariants(link) : [];
+  if (variants.length) {
+    const list = variants.map((v) => `"${v.replace(/"/g, "")}"`).join(",");
+    const { data, error } = await db.from("clubs").select("id,name").eq("status", "active").or(`url.in.(${list})`).limit(1);
+    if (error) throw error;
+    if (data?.[0]) return data[0] as ExistingClub;
+  }
+  if (name) {
+    const { data, error } = await db.from("clubs").select("id,name").eq("status", "active").ilike("name", name.replace(/[\\%_]/g, "\\$&")).limit(1);
+    if (error) throw error;
+    if (data?.[0]) return data[0] as ExistingClub;
   }
   return null;
 }

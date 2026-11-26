@@ -4,7 +4,7 @@ import { ClubCard } from "@/components/ClubCard";
 import { InterestIcon } from "@/components/InterestIcon";
 import { PageHeader } from "@/components/PageHeader";
 import { SectionHeading } from "@/components/SectionHeading";
-import { clubs, clubsByInterest } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs-all";
 import { interests } from "@/lib/interests";
 
 export const metadata: Metadata = {
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   description: "Directory of Oʻahu clubs by interest: professional groups, golf, gyms, yacht and member clubs, with publicly posted membership info and how to join.",
 };
 
-export default function ClubsPage() {
+export default async function ClubsPage() {
+  const clubs = await getClubs();
   const listed = clubs.filter((c) => !c.pending);
   return (
     <>
@@ -23,7 +24,7 @@ export default function ClubsPage() {
         <SectionHeading title="Browse by interest" subtitle="Pick a category to see who's listed." />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {interests.map((i) => {
-            const count = clubsByInterest(i.id).length;
+            const count = clubs.filter((c) => c.interest === i.id).length;
             return (
               <Link key={i.id} href={`/clubs/${i.id}`} className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-clay-300 hover:shadow-[0_14px_34px_rgba(42,36,25,0.12)]">
                 <span className={`grid h-14 w-14 place-items-center rounded-2xl ${i.tile}`}><InterestIcon id={i.id} className="h-7 w-7" /></span>

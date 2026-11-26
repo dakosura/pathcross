@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Event, EventCategory } from "@/types";
 import { downloadIcs, icsFileMany } from "@/lib/calendar-links";
-import { clubById } from "@/lib/clubs";
 import { useNetwork } from "@/lib/network";
 import { CalendarView } from "./CalendarView";
 import { SignInForm } from "./SignInForm";
@@ -15,7 +14,7 @@ type View = "all" | "mine";
  * which fills itself from My Network: events added directly, plus every event hosted by a club
  * that was added. Open it directly with /calendar#mine.
  */
-export function CalendarSwitcher({ events, today, categories }: { events: Event[]; today: string; categories: readonly EventCategory[] }) {
+export function CalendarSwitcher({ events, today, categories, clubNames }: { events: Event[]; today: string; categories: readonly EventCategory[]; clubNames: Record<string, string> }) {
   const [view, setView] = useState<View>("all");
   const { saved, user, status } = useNetwork();
 
@@ -38,10 +37,10 @@ export function CalendarSwitcher({ events, today, categories }: { events: Event[
       const viaClub = !direct && e.club_id !== undefined && saved.clubs.includes(e.club_id);
       if (!direct && !viaClub) continue;
       list.push(e);
-      labels[e.id] = viaClub ? clubById(e.club_id)?.name ?? null : null;
+      labels[e.id] = viaClub ? (e.club_id && clubNames[e.club_id]) || null : null;
     }
     return { list, labels };
-  }, [events, saved]);
+  }, [events, saved, clubNames]);
 
   const upcomingMine = mine.list.filter((e) => e.date >= today);
 

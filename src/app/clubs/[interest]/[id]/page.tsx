@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { EventCard } from "@/components/EventCard";
 import { InterestIcon } from "@/components/InterestIcon";
 import { SaveButton } from "@/components/SaveButton";
-import { clubs, clubById } from "@/lib/clubs";
+import { clubs } from "@/lib/clubs";
+import { getClubById } from "@/lib/clubs-all";
 import { getEvents } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { interestById } from "@/lib/interests";
@@ -20,7 +21,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/clubs/[interest]/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const club = clubById(id);
+  const club = await getClubById(id);
   if (!club) return { title: "Club" };
   const blurb = club.blurb.replace(/\s+/g, " ").trim();
   const description = blurb.length > 155 ? `${blurb.slice(0, 152).trimEnd()}…` : blurb;
@@ -61,7 +62,7 @@ export default function ClubPage(props: PageProps<"/clubs/[interest]/[id]">) {
 
 async function Content({ params }: Pick<PageProps<"/clubs/[interest]/[id]">, "params">) {
   const { interest: interestId, id } = await params;
-  const club = clubById(id);
+  const club = await getClubById(id);
   if (!club || club.interest !== interestId) notFound();
   const interest = interestById(club.interest)!;
   const events = (await getEvents()).filter((e) => e.club_id === club.id);
