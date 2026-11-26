@@ -9,7 +9,7 @@ import { DateBlock } from "@/components/DateBlock";
 import { InterestIcon } from "@/components/InterestIcon";
 import { SaveButton } from "@/components/SaveButton";
 import { SignupLink } from "@/components/SignupLink";
-import { clubs, clubsByInterest } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs-all";
 import { getCalendarEvents, getEvents, getFeaturedEvents, getToday } from "@/lib/data";
 import { addDays } from "@/lib/recurring";
 import { formatRange } from "@/lib/format";
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [everything, featured, calendar, today] = await Promise.all([getEvents(), getFeaturedEvents(), getCalendarEvents(), getToday()]);
+  const [everything, featured, calendar, today, clubs] = await Promise.all([getEvents(), getFeaturedEvents(), getCalendarEvents(), getToday(), getClubs()]);
   const weekEvents = calendar.filter((e) => e.date <= addDays(today, 14));
   // Weekly markets and run clubs have their own page; keep them out of the headline lists.
   const all = everything.filter((e) => !e.recurrence);
@@ -93,7 +93,7 @@ export default async function Home() {
           <SectionHeading title="Explore by interest" subtitle="Clubs, programs and places to belong, beyond the next mixer." href="/clubs" cta="All clubs & programs" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {interests.map((i) => {
-              const count = clubsByInterest(i.id).length;
+              const count = clubs.filter((c) => c.interest === i.id).length;
               return (
                 <Link key={i.id} href={`/clubs/${i.id}`} className="group flex flex-col rounded-2xl bg-card p-5 ring-1 ring-line transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_34px_rgba(42,36,25,0.12)] hover:ring-clay-300">
                   <span className={`grid h-12 w-12 place-items-center rounded-xl ${i.tile}`}><InterestIcon id={i.id} /></span>

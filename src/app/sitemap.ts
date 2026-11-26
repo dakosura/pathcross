@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
-import { clubs } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs-all";
 import { getEvents } from "@/lib/data";
 import { interests } from "@/lib/interests";
 import { site } from "@/lib/site";
 
 /** Every public page, for search engines. Events come and go, so this is rebuilt with the event list. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const events = await getEvents();
+  const [events, clubs] = await Promise.all([getEvents(), getClubs()]);
   // Only pages whose content really changes get a date, so Google can trust it.
   // Lists built from the live event feed change daily; clubs carry their own "checked" date.
   const now = new Date();

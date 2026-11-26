@@ -1,5 +1,5 @@
 import "server-only";
-import { clubById } from "./clubs";
+import { getClubById } from "./clubs-all";
 import { getEvent } from "./data";
 import { goalLabel, professionLabel } from "./profile";
 import { adminClient } from "./supabase-admin";
@@ -34,7 +34,7 @@ async function pageLabel(path: string): Promise<string> {
   const ev = path.match(/^\/events\/([^/]+)$/);
   if (ev) return (await getEvent(ev[1]).catch(() => undefined))?.title ?? path;
   const club = path.match(/^\/clubs\/[^/]+\/([^/]+)$/);
-  if (club) return clubById(club[1])?.name ?? path;
+  if (club) return (await getClubById(club[1]))?.name ?? path;
   return path === "/" ? "Home" : path;
 }
 
@@ -61,7 +61,7 @@ export async function buildOpsStats(days: number): Promise<OpsStats> {
     await Promise.all(pages.map(async (p) => Object.assign(p, { label: await pageLabel(p.path) })));
     const saved = (traffic.saved_top as { kind: string; id: string }[]) ?? [];
     for (const s of saved) {
-      Object.assign(s, { label: s.kind === "clubs" ? clubById(s.id)?.name ?? s.id : (await getEvent(s.id).catch(() => undefined))?.title ?? s.id });
+      Object.assign(s, { label: s.kind === "clubs" ? (await getClubById(s.id))?.name ?? s.id : (await getEvent(s.id).catch(() => undefined))?.title ?? s.id });
     }
   }
 

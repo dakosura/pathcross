@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClubCard } from "@/components/ClubCard";
 import { PageHeader } from "@/components/PageHeader";
-import { clubsByInterest } from "@/lib/clubs";
+import { getClubsByInterest } from "@/lib/clubs-all";
 import { interests, interestById } from "@/lib/interests";
 
 export function generateStaticParams() {
@@ -31,7 +31,7 @@ async function Content({ params }: Pick<PageProps<"/clubs/[interest]">, "params"
   const { interest: id } = await params;
   const interest = interestById(id);
   if (!interest) notFound();
-  const list = clubsByInterest(interest.id);
+  const list = await getClubsByInterest(interest.id);
   const ready = list.filter((c) => !c.pending);
   const pending = list.filter((c) => c.pending);
 

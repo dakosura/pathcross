@@ -8,7 +8,7 @@ import { GoingButton } from "@/components/GoingButton";
 import { EventInsights } from "@/components/EventRating";
 import { SaveButton } from "@/components/SaveButton";
 import { SignupLink } from "@/components/SignupLink";
-import { clubById } from "@/lib/clubs";
+import { getClubById } from "@/lib/clubs-all";
 import { events, getEvent } from "@/lib/data";
 import { formatDate, formatRange } from "@/lib/format";
 import { site } from "@/lib/site";
@@ -84,7 +84,7 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
   const { id } = await params;
   const ev = await getEvent(id);
   if (!ev) notFound();
-  const club = clubById(ev.club_id);
+  const club = await getClubById(ev.club_id);
 
   const crumbs = breadcrumbs([{ name: "Home", path: "/" }, { name: "Events", path: "/events" }, { name: ev.title }]);
   return (

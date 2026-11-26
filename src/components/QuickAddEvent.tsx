@@ -6,6 +6,10 @@ const CATEGORIES = ["General Professional", "Tech", "Startup", "Finance", "Real 
 interface Draft { title: string; date: string; start_time: string; end_time: string; venue: string; address: string; organizer: string; description: string; price: string; category: string; source_url: string; registration_url: string }
 const BLANK: Draft = { title: "", date: "", start_time: "", end_time: "", venue: "", address: "", organizer: "", description: "", price: "", category: "General Professional", source_url: "", registration_url: "" };
 
+interface Club { name: string; interest: string; blurb: string; url: string; area: string; address: string; membership: string; phone: string }
+const BLANK_CLUB: Club = { name: "", interest: "professional", blurb: "", url: "", area: "Honolulu", address: "", membership: "", phone: "" };
+const INTERESTS: [string, string][] = [["professional", "Professional & networking"], ["realestate", "Real estate & investing"], ["food", "Food & drink"], ["sports", "Sports clubs & leagues"], ["fitness", "Gyms, fitness & run clubs"], ["golf", "Golf clubs"], ["social", "Member & social clubs"], ["boating", "Yacht & boating clubs"], ["volunteer", "Volunteering"]];
+
 const input = "w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none focus:border-moss";
 
 /** Shrinks a phone screenshot so it stays well under the upload limit. */
@@ -32,7 +36,9 @@ export function QuickAddEvent({ token }: { token: string }) {
   const [link, setLink] = useState("");
   const [text, setText] = useState("");
   const [image, setImage] = useState<{ media_type: string; data: string; preview: string } | null>(null);
+  const [kind, setKind] = useState<"auto" | "event" | "group">("auto");
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [club, setClub] = useState<Club | null>(null);
   const [busy, setBusy] = useState<"read" | "save" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -47,15 +53,22 @@ export function QuickAddEvent({ token }: { token: string }) {
   /** The event is already listed: nothing is added, the form is cleared. */
   const skip = (d: { title: string; date: string }) => {
     setDone(`Already listed: "${d.title}" (${d.date}). Nothing was added.`);
-    setDraft(null); setLink(""); setText(""); setImage(null);
+    setDraft(null); setClub(null); setLink(""); setText(""); setImage(null);
+  };
+
+  const skipClub = (c: { name: string }) => {
+    setDone(`Already listed: "${c.name}". Nothing was added.`);
+    setDraft(null); setClub(null); setLink(""); setText(""); setImage(null);
   };
 
   const readIt = async () => {
     setError(null); setDone(null); setBusy("read");
     try {
-      const out = await call("/api/ops/extract", { link, text, image: image ? { media_type: image.media_type, data: image.data } : undefined });
+      const out = await call("/api/ops/extract", { link, text, image: image ? { media_type: image.media_type, data: image.data } : undefined, kind: kind === "auto" ? undefined : kind });
       if (out.duplicate) { skip(out.duplicate); return; }
-      setDraft({ ...BLANK, ...out.draft });
+      if (out.duplicateClub) { skipClub(out.duplicateClub); return; }
+      if (out.kind === "group") setClub({ ...BLANK_CLUB, ...out.club });
+      else setDraft({ ...BLANK, ...out.draft });
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setBusy(null); }
   };
@@ -72,6 +85,25 @@ export function QuickAddEvent({ token }: { token: string }) {
     finally { setBusy(null); }
   };
 
+  const saveClub = async () => {
+    if (!club) return;
+    setError(null); setBusy("save");
+    try {
+      const out = await call("/api/ops/clubs", club);
+      if (out.duplicateClub) { skipClub(out.duplicateClub); return; }
+      setDone(`Added "${club.name}". It's in Clubs & Programs now.`);
+      setClub(null); setLink(""); setText(""); setImage(null);
+    } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
+    finally { setBusy(null); }
+  };
+
+  const setC = (k: keyof Club) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setClub((c) => (c ? { ...c, [k]: e.target.value } : c));
+  const cfield = (label: string, k: keyof Club, type = "text") => (
+    <label className="block text-sm font-semibold text-ink">{label}
+      <input type={type} value={club![k]} onChange={setC(k)} className={`${input} mt-1 font-normal`} />
+    </label>
+  );
+
   const set = (k: keyof Draft) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setDraft((d) => (d ? { ...d, [k]: e.target.value } : d));
   const field = (label: string, k: keyof Draft, type = "text") => (
     <label className="block text-sm font-semibold text-ink">{label}
@@ -82,7 +114,7 @@ export function QuickAddEvent({ token }: { token: string }) {
   return (
     <section className="mt-8 rounded-2xl border border-line bg-card">
       <button onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between px-5 py-4 text-left">
-        <span><span className="block text-lg font-semibold">Quick add an event</span><span className="text-sm text-bark">Paste a link, caption or screenshot and review what gets filled in</span></span>
+        <span><span className="block text-lg font-semibold">Quick add an event or group</span><span className="text-sm text-bark">Paste a link, caption or screenshot and review what gets filled in</span></span>
         <span className="text-xl text-bark" aria-hidden>{open ? "–" : "+"}</span>
       </button>
       {open && (
@@ -90,9 +122,16 @@ export function QuickAddEvent({ token }: { token: string }) {
           {done && <p role="status" className="rounded-xl bg-moss-50 px-4 py-3 text-sm font-medium text-forest">{done}</p>}
           {error && <p role="alert" className="rounded-xl bg-clay-50 px-4 py-3 text-sm font-medium text-clay-700">{error}</p>}
 
-          {!draft ? (
+          {!draft && !club ? (
             <>
-              <label className="block text-sm font-semibold text-ink">Event link (optional)
+              <label className="block text-sm font-semibold text-ink">What is it?
+                <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={`${input} mt-1 font-normal`}>
+                  <option value="auto">Not sure, work it out</option>
+                  <option value="event">An event (has a date)</option>
+                  <option value="group">A group or club (ongoing)</option>
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-ink">Link to the event or group (optional)
                 <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://…" inputMode="url" className={`${input} mt-1 font-normal`} />
               </label>
               <label className="block text-sm font-semibold text-ink">Caption or text (optional)
@@ -111,7 +150,31 @@ export function QuickAddEvent({ token }: { token: string }) {
               </button>
               <p className="text-xs text-bark">Instagram, Facebook and LinkedIn links usually can&apos;t be read automatically. For those, paste the caption or add a screenshot.</p>
             </>
-          ) : (
+          ) : club ? (
+            <>
+              <p className="text-sm text-bark">This looks like a group or club. Check each field, fix anything that&apos;s off, then add it. Nothing is saved until you press Add.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-2">{cfield("Name", "name")}</div>
+                <label className="block text-sm font-semibold text-ink">Interest
+                  <select value={club.interest} onChange={setC("interest")} className={`${input} mt-1 font-normal`}>{INTERESTS.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select>
+                </label>
+                {cfield("Area (neighborhood or Online)", "area")}
+                <div className="sm:col-span-2">{cfield("Website or page (required)", "url", "url")}</div>
+                {cfield("Address", "address")}
+                {cfield("Phone", "phone")}
+                <label className="block text-sm font-semibold text-ink sm:col-span-2">About
+                  <textarea value={club.blurb} onChange={setC("blurb")} rows={3} className={`${input} mt-1 font-normal`} />
+                </label>
+                <label className="block text-sm font-semibold text-ink sm:col-span-2">How to join / meeting times
+                  <textarea value={club.membership} onChange={setC("membership")} rows={3} className={`${input} mt-1 font-normal`} />
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => void saveClub()} disabled={busy !== null} className="rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-cream hover:bg-forest-700 disabled:opacity-50">{busy === "save" ? "Adding…" : "Add group"}</button>
+                <button onClick={() => { setClub(null); setError(null); }} disabled={busy !== null} className="rounded-full px-4 py-2.5 text-sm font-semibold text-clay-700 hover:underline">Start over</button>
+              </div>
+            </>
+          ) : draft && (
             <>
               <p className="text-sm text-bark">Check each field, fix anything that&apos;s off, then add it. Nothing is saved until you press Add.</p>
               <div className="grid gap-3 sm:grid-cols-2">

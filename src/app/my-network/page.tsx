@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { NetworkMap } from "@/components/NetworkMap";
-import { clubs } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs-all";
 import { getEvents, getRecentEvents, getToday } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function MyNetworkPage() {
-  const [events, past, today] = await Promise.all([getEvents(), getRecentEvents(), getToday()]);
+  const [events, past, today, clubs] = await Promise.all([getEvents(), getRecentEvents(), getToday(), getClubs()]);
   return <NetworkMap events={events} past={past} today={today} clubs={clubs} />;
 }
