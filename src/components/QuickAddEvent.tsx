@@ -44,10 +44,17 @@ export function QuickAddEvent({ token }: { token: string }) {
     return out;
   };
 
+  /** The event is already listed: nothing is added, the form is cleared. */
+  const skip = (d: { title: string; date: string }) => {
+    setDone(`Already listed: "${d.title}" (${d.date}). Nothing was added.`);
+    setDraft(null); setLink(""); setText(""); setImage(null);
+  };
+
   const readIt = async () => {
     setError(null); setDone(null); setBusy("read");
     try {
       const out = await call("/api/ops/extract", { link, text, image: image ? { media_type: image.media_type, data: image.data } : undefined });
+      if (out.duplicate) { skip(out.duplicate); return; }
       setDraft({ ...BLANK, ...out.draft });
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
     finally { setBusy(null); }
@@ -57,7 +64,8 @@ export function QuickAddEvent({ token }: { token: string }) {
     if (!draft) return;
     setError(null); setBusy("save");
     try {
-      await call("/api/ops/events", draft);
+      const out = await call("/api/ops/events", draft);
+      if (out.duplicate) { skip(out.duplicate); return; }
       setDone(`Added "${draft.title}". It's on the calendar now.`);
       setDraft(null); setLink(""); setText(""); setImage(null);
     } catch (e) { setError(e instanceof Error ? e.message : "Something went wrong."); }
