@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/ops";
-import { extractEvent } from "@/lib/quick-add";
+import { extractEvent, findExisting } from "@/lib/quick-add";
 
 // Quick-add step 1: the owner pastes a link, caption text and/or a screenshot; Claude fills in a draft event to review.
 export const maxDuration = 60;
@@ -17,6 +17,12 @@ export async function POST(request: Request) {
     const link = typeof b.link === "string" ? b.link.trim() : "";
     const img = b.image && typeof b.image.data === "string" && typeof b.image.media_type === "string" && /^image\/(jpeg|png|webp|gif)$/.test(b.image.media_type) ? { media_type: b.image.media_type, data: b.image.data } : undefined;
     if (!text && !link && !img) return json({ error: "empty", message: "Paste a link, some text, or add a screenshot first." }, 422);
+
+    // A link we already list is skipped before spending an AI call on it.
+    if (link) {
+      const dup = await findExisting([link]);
+      if (dup) return json({ duplicate: dup });
+    }
 
     return json({ draft: await extractEvent({ text, link, image: img }) });
   } catch (err) {

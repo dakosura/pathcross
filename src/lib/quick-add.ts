@@ -1,5 +1,7 @@
 import "server-only";
 import { categoryStyle } from "./categories";
+import { events as realEvents } from "./data";
+import { adminClient } from "./supabase-admin";
 import type { EventCategory } from "@/types";
 
 export const CATEGORIES = Object.keys(categoryStyle) as EventCategory[];
@@ -137,3 +139,43 @@ export async function extractEvent(input: { text?: string; link?: string; image?
 }
 
 export const eventId = (d: DraftEvent) => `manual-${d.date}-${d.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+
+export interface ExistingEvent { id: string; title: string; date: string }
+
+/** The same link written the ways it may have been stored: no tracking query or #fragment, with and without a trailing slash. */
+function linkVariants(raw: string): string[] {
+  try {
+    const u = new URL(raw);
+    const base = `${u.origin}${u.pathname}`.replace(/\/+$/, "");
+    return [...new Set([raw, base, `${base}/`])];
+  } catch {
+    return [];
+  }
+}
+
+const sameLink = (a: string, b: string) => linkVariants(a).some((v) => linkVariants(b).includes(v));
+
+/**
+ * Looks for an event that is already listed: the same link (as its page or sign-up link), or, once a
+ * draft exists, the same title on the same date. Returns it so the caller can skip adding a copy.
+ */
+export async function findExisting(links: string[], title?: string, date?: string): Promise<ExistingEvent | null> {
+  const wanted = links.filter(Boolean);
+  const curated = realEvents.find((e) => (title && date && e.date === date && e.title.toLowerCase() === title.toLowerCase()) || wanted.some((l) => sameLink(l, e.source_url) || (e.registration_url && sameLink(l, e.registration_url))));
+  if (curated) return { id: curated.id, title: curated.title, date: curated.date };
+
+  const db = adminClient();
+  const variants = wanted.flatMap(linkVariants);
+  if (variants.length) {
+    const list = variants.map((v) => `"${v.replace(/"/g, "")}"`).join(",");
+    const { data, error } = await db.from("events").select("id,title,date").eq("status", "active").or(`source_url.in.(${list}),registration_url.in.(${list})`).limit(1);
+    if (error) throw error;
+    if (data?.[0]) return data[0] as ExistingEvent;
+  }
+  if (title && date) {
+    const { data, error } = await db.from("events").select("id,title,date").eq("status", "active").eq("date", date).ilike("title", title.replace(/[\\%_]/g, "\\$&")).limit(1);
+    if (error) throw error;
+    if (data?.[0]) return data[0] as ExistingEvent;
+  }
+  return null;
+}

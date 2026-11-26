@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/ops";
-import { cleanDraft, eventId, validateDraft } from "@/lib/quick-add";
+import { cleanDraft, eventId, findExisting, validateDraft } from "@/lib/quick-add";
 import { adminClient } from "@/lib/supabase-admin";
 
 // Quick-add step 2: saves the reviewed event. Imports never touch rows whose source is "manual".
@@ -13,6 +13,10 @@ export async function POST(request: Request) {
     const d = cleanDraft(await request.json());
     const problem = validateDraft(d);
     if (problem) return json({ error: "invalid", message: problem }, 422);
+
+    // Already listed (same link, or same title on the same day)? Ignore it and say so.
+    const dup = await findExisting([d.source_url, d.registration_url], d.title, d.date);
+    if (dup) return json({ duplicate: dup });
 
     const id = eventId(d);
     const { error } = await adminClient().from("events").upsert({
