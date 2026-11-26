@@ -8,8 +8,8 @@ import { clubs, clubsByInterest } from "@/lib/clubs";
 import { interests } from "@/lib/interests";
 
 export const metadata: Metadata = {
-  title: "Clubs & Programs",
-  description: "Oʻahu clubs, gyms, golf, member and boating clubs by interest, with publicly posted membership information.",
+  title: "Clubs in Honolulu: golf, fitness, professional & more",
+  description: "Directory of Oʻahu clubs by interest: professional groups, golf, gyms, yacht and member clubs, with publicly posted membership info and how to join.",
 };
 
 export default function ClubsPage() {

@@ -10,6 +10,9 @@ import { getEvents } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { interestById } from "@/lib/interests";
 import { hostLabel } from "@/lib/links";
+import { breadcrumbs, jsonLd } from "@/lib/jsonld";
+import { site } from "@/lib/site";
+import type { Club } from "@/types";
 
 export function generateStaticParams() {
   return clubs.map((c) => ({ interest: c.interest, id: c.id }));
@@ -18,7 +21,33 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/clubs/[interest]/[id]">): Promise<Metadata> {
   const { id } = await params;
   const club = clubById(id);
-  return { title: club?.name ?? "Club", description: club?.blurb };
+  if (!club) return { title: "Club" };
+  const blurb = club.blurb.replace(/\s+/g, " ").trim();
+  const description = blurb.length > 155 ? `${blurb.slice(0, 152).trimEnd()}…` : blurb;
+  const what = club.pending ? "how to join" : club.pricing?.length ? "membership, pricing and how to join" : "membership and how to join";
+  return { title: `${club.name}, ${club.area}: ${what}`, description };
+}
+
+/** schema.org data so Google can show the club as a place or organization. */
+function clubJsonLd(club: Club) {
+  const url = `${site.url}/clubs/${club.interest}/${club.id}`;
+  const physical = club.area !== "Online" && (club.address || (club.lat && club.lng));
+  return {
+    "@context": "https://schema.org",
+    "@type": physical ? "LocalBusiness" : "Organization",
+    "@id": `${url}#club`,
+    name: club.name,
+    description: club.blurb,
+    url: club.url ?? url,
+    mainEntityOfPage: url,
+    telephone: club.phone,
+    ...(physical
+      ? {
+          address: { "@type": "PostalAddress", streetAddress: club.address, addressLocality: club.area, addressRegion: "HI", addressCountry: "US" },
+          geo: club.lat && club.lng ? { "@type": "GeoCoordinates", latitude: club.lat, longitude: club.lng } : undefined,
+        }
+      : { areaServed: "Honolulu, Hawaii" }),
+  };
 }
 
 // `params` is read inside <Suspense> so navigation to this route stays instant.
@@ -37,8 +66,12 @@ async function Content({ params }: Pick<PageProps<"/clubs/[interest]/[id]">, "pa
   const interest = interestById(club.interest)!;
   const events = (await getEvents()).filter((e) => e.club_id === club.id);
 
+  const crumbs = breadcrumbs([{ name: "Home", path: "/" }, { name: "Clubs & Programs", path: "/clubs" }, { name: interest.name, path: `/clubs/${interest.id}` }, { name: club.name }]);
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(clubJsonLd(club)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(crumbs) }} />
       <Link href={`/clubs/${interest.id}`} className="text-sm font-medium text-clay-700 hover:text-clay">← {interest.name}</Link>
       <div className="mt-6 flex items-start gap-5">
         <span className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${interest.tile}`}><InterestIcon id={club.interest} className="h-8 w-8" /></span>

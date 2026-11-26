@@ -14,7 +14,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/clubs/[interest]">): Promise<Metadata> {
   const { interest } = await params;
   const i = interestById(interest);
-  return { title: i?.name ?? "Clubs & Programs", description: i?.blurb };
+  if (!i) return { title: "Clubs & Programs" };
+  return { title: `${i.name} in Honolulu & Oʻahu`, description: `${i.blurb} Compare public membership info, pricing and how to join across Oʻahu.` };
 }
 
 // `params` is read inside <Suspense> so navigation to this route stays instant.

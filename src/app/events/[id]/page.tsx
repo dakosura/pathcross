@@ -12,6 +12,7 @@ import { clubById } from "@/lib/clubs";
 import { events, getEvent } from "@/lib/data";
 import { formatDate, formatRange } from "@/lib/format";
 import { site } from "@/lib/site";
+import { breadcrumbs } from "@/lib/jsonld";
 import type { Event } from "@/types";
 
 export function generateStaticParams() {
@@ -85,8 +86,10 @@ async function Content({ params }: Pick<PageProps<"/events/[id]">, "params">) {
   if (!ev) notFound();
   const club = clubById(ev.club_id);
 
+  const crumbs = breadcrumbs([{ name: "Home", path: "/" }, { name: "Events", path: "/events" }, { name: ev.title }]);
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs).replace(/</g, "\\u003c") }} />
       {!ev.placeholder && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd(ev)).replace(/</g, "\\u003c") }} />}
       <div className="bg-forest bg-topo text-cream">
         <div className="rise mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
