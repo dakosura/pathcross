@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuthDialog } from "@/components/AuthDialog";
 import { CookieBanner } from "@/components/CookieConsent";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { site } from "@/lib/site";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthDialog />
         <CookieBanner />
         <PageViewTracker />
+        <GoogleAnalytics />
       </body>
     </html>
   );

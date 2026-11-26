@@ -27,7 +27,7 @@ export default function CookiesPage() {
       <p>We count page views with our own simple counter. It sets no cookies and stores nothing in your browser, and it keeps no IP address: each visit gets a one-way anonymous code that changes every day. It does nothing if your browser sends a Do Not Track or Global Privacy Control signal. The <Link href="/privacy">privacy notice</Link> lists what it records.</p>
 
       <h2>Optional analytics</h2>
-      <p>We don&apos;t run any third-party analytics at the moment. If we add it, it will help us understand which pages are useful, and it will load only for people who chose &quot;Accept all&quot;. If you chose &quot;Essential only&quot;, it won&apos;t load for you.</p>
+      <p>We use Google Analytics to understand which pages are useful. It loads only if you chose &quot;Accept all&quot;. If you chose &quot;Essential only&quot;, it doesn&apos;t load for you, and it never loads if your browser sends a Do Not Track or Global Privacy Control signal. Google Analytics sets cookies (named like <code>_ga</code>) that record an anonymous visitor ID and your pages visited, and Google processes that data. We turn off Google&apos;s advertising features and ad personalization, and we don&apos;t send it your account details or any private pages. Choosing &quot;Essential only&quot; later stops it from loading again; you can also clear your browser&apos;s cookies for this site.</p>
 
       <h2>Other services</h2>
       <p>The maps load imagery from Google Maps Platform (home page) and OpenFreeMap. Your browser contacts those services directly, and they may keep their own technical records. See the <Link href="/privacy">privacy notice</Link> for details.</p>
