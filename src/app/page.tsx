@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { site } from "@/lib/site";
 import { Hero } from "@/components/Hero";
 import { SectionHeading } from "@/components/SectionHeading";
 import { PersonalFeatured } from "@/components/PersonalFeatured";
@@ -12,6 +14,21 @@ import { getCalendarEvents, getEvents, getFeaturedEvents, getToday } from "@/lib
 import { addDays } from "@/lib/recurring";
 import { formatRange } from "@/lib/format";
 import { interests } from "@/lib/interests";
+
+// The homepage lives at "/", not "/index", so say so explicitly (the site-wide "./" resolves to /index here).
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  // Next replaces the whole openGraph block per page, so repeat the layout's values.
+  openGraph: {
+    type: "website",
+    siteName: site.name,
+    locale: "en_US",
+    url: "/",
+    title: "PathCross: Efficient Networking for Business Professionals in Honolulu",
+    description: site.description,
+    images: [{ url: "/brand/og.jpg", width: 1200, height: 630, alt: "PathCross" }],
+  },
+};
 
 export default async function Home() {
   const [everything, featured, calendar, today] = await Promise.all([getEvents(), getFeaturedEvents(), getCalendarEvents(), getToday()]);
