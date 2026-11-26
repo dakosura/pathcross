@@ -17,5 +17,5 @@ export const site = {
     { id: "x", name: "X", handle: "@JoinPathCross", url: "https://x.com/JoinPathCross" },
   ] as const,
   /** Shown as "Last updated" on the legal pages. Change whenever their wording changes. */
-  policiesUpdated: "November 21, 2026",
+  policiesUpdated: "November 25, 2026",
 };

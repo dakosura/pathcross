@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <li>To understand which pages and events are useful, so we can improve the site.</li>
         <li>To keep the site working and secure.</li>
       </ul>
-      <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. Beyond the anonymous visit counts above, we don&apos;t use analytics. If we add a third-party analytics service, it will only run with your consent, as described in the <Link href="/cookies">cookie policy</Link>.</p>
+      <p>We don&apos;t sell your information, and we don&apos;t use it for advertising. Beyond the anonymous visit counts above, we use Google Analytics, which runs only if you choose &quot;Accept all&quot; in the cookie banner, as described in the <Link href="/cookies">cookie policy</Link>. It records pages viewed, approximate location, device and browser using cookies, and Google processes that data. We turn off its advertising features.</p>
 
       <h2>Who helps us run the site</h2>
       <p>These providers process data for us, or receive requests from your browser when you use the site:</p>
